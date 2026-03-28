@@ -13013,17 +13013,45 @@ end
 				end
 			end
 		})
-		local function startAntiServerLagger()
-			game:GetService("ReplicatedStorage").Characters.Mob.WallCombo.MobWallCombo:Destroy()
-			game:GetService("ReplicatedStorage").Characters.Gon.WallCombo.GonWallCombo:Destroy()
-			game:GetService("SoundService").All.Sounds.GonWallCombo:Destroy()
-			game:GetService("SoundService").All.Sounds.MobWallCombo:Destroy()
-			showNotification("Server Lagger", "Anti Server Lagger: ON")
-		end
-		
-		local function stopAntiServerLagger()
-			showNotification("Server Lagger", "Anti Server Lagger: OFF")
-		end
+local savedMobWallCombo = nil
+local savedGonWallCombo = nil
+local savedGonWallComboSound = nil
+local savedMobWallComboSound = nil
+
+local function startAntiServerLagger()
+    local mobWallCombo = game:GetService("ReplicatedStorage").Characters.Mob.WallCombo:FindFirstChild("MobWallCombo")
+    local gonWallCombo = game:GetService("ReplicatedStorage").Characters.Gon.WallCombo:FindFirstChild("GonWallCombo")
+    local gonWallComboSound = game:GetService("SoundService").All.Sounds:FindFirstChild("GonWallCombo")
+    local mobWallComboSound = game:GetService("SoundService").All.Sounds:FindFirstChild("MobWallCombo")
+
+    if mobWallCombo then savedMobWallCombo = mobWallCombo:Clone() mobWallCombo:Destroy() end
+    if gonWallCombo then savedGonWallCombo = gonWallCombo:Clone() gonWallCombo:Destroy() end
+    if gonWallComboSound then savedGonWallComboSound = gonWallComboSound:Clone() gonWallComboSound:Destroy() end
+    if mobWallComboSound then savedMobWallComboSound = mobWallComboSound:Clone() mobWallComboSound:Destroy() end
+
+    showNotification("Server Lagger", "Anti Server Lagger: ON")
+end
+
+local function stopAntiServerLagger()
+    if savedMobWallCombo then
+        savedMobWallCombo.Parent = game:GetService("ReplicatedStorage").Characters.Mob.WallCombo
+        savedMobWallCombo = nil
+    end
+    if savedGonWallCombo then
+        savedGonWallCombo.Parent = game:GetService("ReplicatedStorage").Characters.Gon.WallCombo
+        savedGonWallCombo = nil
+    end
+    if savedGonWallComboSound then
+        savedGonWallComboSound.Parent = game:GetService("SoundService").All.Sounds
+        savedGonWallComboSound = nil
+    end
+    if savedMobWallComboSound then
+        savedMobWallComboSound.Parent = game:GetService("SoundService").All.Sounds
+        savedMobWallComboSound = nil
+    end
+
+    showNotification("Server Lagger", "Anti Server Lagger: OFF")
+end
 		
 		ServerLaggerSection:AddToggle({
 			Name = "Anti Server Lagger wallcombo1(breaks gon and mob wallcombo)",
@@ -13037,18 +13065,56 @@ end
 					stopAntiServerLagger()
 				end
 			end
-		})	
+		})
+		local savedMobCounter = nil
+		local savedMobCounterAttack = nil
+		local savedMobCounterBubble = nil
+		local savedMobClairvoyanceSound = nil
+		local savedMobClairvoyanceCounterSound = nil
+		local savedMobClairvoyanceNoCounterSound = nil
+
 		local function startAnti2ServerLagger()
-			game:GetService("ReplicatedStorage").Characters.Mob.Abilities["4"].MobCounter:Destroy()
-			game:GetService("ReplicatedStorage").Characters.Mob.Abilities["4"].MobCounterAttack:Destroy()
-			game:GetService("ReplicatedStorage").Characters.Mob.Abilities["4"].MobCounterBubble:Destroy()
-			game:GetService("SoundService").All.Sounds.MobClairvoyance:Destroy()
-			game:GetService("SoundService").All.Sounds.MobClairvoyanceCounter:Destroy()
-			game:GetService("SoundService").All.Sounds.MobClairvoyanceNoCounter:Destroy()
+			local MobCounter = game:GetService("ReplicatedStorage").Characters.Mob.Abilities["4"].MobCounter
+			local MobCounterAttack = game:GetService("ReplicatedStorage").Characters.Mob.Abilities["4"].MobCounterAttack
+			local MobCounterBubble = game:GetService("ReplicatedStorage").Characters.Mob.Abilities["4"].MobCounterBubble
+			local MobClairvoyanceSound = game:GetService("SoundService").All.Sounds.MobClairvoyance
+			local MobClairvoyanceCounterSound = game:GetService("SoundService").All.Sounds.MobClairvoyanceCounter
+			local MobClairvoyanceNoCounterSound = game:GetService("SoundService").All.Sounds.MobClairvoyanceNoCounter
+
+			if MobCounter then savedMobCounter = MobCounter:Clone() MobCounter:Destroy() end
+			if MobCounterAttack then savedMobCounterAttack = MobCounterAttack:Clone() MobCounterAttack:Destroy() end
+			if MobCounterBubble then savedMobCounterBubble = MobCounterBubble:Clone() MobCounterBubble:Destroy() end
+			if MobClairvoyanceSound then savedMobClairvoyanceSound = MobClairvoyanceSound:Clone() MobClairvoyanceSound:Destroy() end
+			if MobClairvoyanceCounterSound then savedMobClairvoyanceCounterSound = MobClairvoyanceCounterSound:Clone() MobClairvoyanceCounterSound:Destroy() end
+			if MobClairvoyanceNoCounterSound then savedMobClairvoyanceNoCounterSound = MobClairvoyanceNoCounterSound:Clone() MobClairvoyanceNoCounterSound:Destroy() end
 			showNotification("Server Lagger", "Anti Server Lagger: ON")
 		end
 		
 		local function stopAnti2ServerLagger()
+			if savedMobCounter then
+				savedMobCounter.Parent = game:GetService("ReplicatedStorage").Characters.Mob.Abilities["4"].MobCounter
+				savedMobCounter = nil
+			end
+			if savedMobCounterAttack then
+				savedMobCounterAttack.Parent = game:GetService("ReplicatedStorage").Characters.Mob.Abilities["4"].MobCounterAttack
+				savedMobCounterAttack = nil
+			end
+			if savedMobCounterBubble then
+				savedMobCounterBubble.Parent = game:GetService("ReplicatedStorage").Characters.Mob.Abilities["4"].MobCounterBubble
+				savedMobCounterBubble = nil
+			end
+			if savedMobClairvoyanceSound then
+				savedMobClairvoyanceSound.Parent = game:GetService("SoundService").All.Sounds.MobClairvoyance
+				savedMobClairvoyanceSound = nil
+			end
+			if savedMobClairvoyanceCounterSound then
+				savedMobClairvoyanceCounterSound.Parent = game:GetService("SoundService").All.Sounds.MobClairvoyanceCounter
+				savedMobClairvoyanceCounterSound = nil
+			end
+			if savedMobClairvoyanceNoCounterSound then
+				savedMobClairvoyanceNoCounterSound.Parent = game:GetService("SoundService").All.Sounds.MobClairvoyanceNoCounter
+				savedMobClairvoyanceNoCounterSound = nil
+			end
 			showNotification("Server Lagger", "Anti Server Lagger: OFF")
 		end
 		
@@ -13065,13 +13131,25 @@ end
 				end
 			end
 		})
+		local savedNanamiWallCombo = nil
+		local savedNanamiWallComboSound = nil
 		local function startAnti3ServerLagger()
-			game:GetService("ReplicatedStorage").Characters.Nanami.WallCombo.NanamiWallCombo:Destroy()
-			game:GetService("SoundService").All.Sounds.NanamiWallCombo:Destroy()	
+			local NanamiWallCombo = game:GetService("ReplicatedStorage").Characters.Nanami.WallCombo.NanamiWallCombo
+			local NanamiWallComboSound = game:GetService("SoundService").All.Sounds.NanamiWallCombo
+			if NanamiWallCombo then savedNanamiWallCombo = NanamiWallCombo:Clone() NanamiWallCombo:Destroy() end
+			if NanamiWallComboSound then savedNanamiWallComboSound = NanamiWallComboSound:Clone() NanamiWallComboSound:Destroy() end
 			showNotification("Server Lagger", "Anti Server Lagger: ON")
 		end
 		
 		local function stopAnti3ServerLagger()
+			if savedNanamiWallCombo then
+				savedNanamiWallCombo.Parent = game:GetService("ReplicatedStorage").Characters.Nanami.WallCombo.NanamiWallCombo
+				savedNanamiWallCombo = nil
+			end
+			if savedNanamiWallComboSound then
+				savedNanamiWallComboSound.Parent = game:GetService("SoundService").All.Sounds.NanamiWallCombo
+				savedNanamiWallComboSound = nil
+			end
 			showNotification("Server Lagger", "Anti Server Lagger: OFF")
 		end
 		
@@ -13563,7 +13641,6 @@ do
 			if enabled then
 				task.spawn(function() 
 					while dashActive do 
-						lpdash()
 						task.wait(0.1) 
 					end 
 				end)
