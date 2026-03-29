@@ -14465,6 +14465,81 @@ do
 			Content = "this feature will give you:\n- higher chance of hitting loopdash \n- absolutely 0 chance of failing bonedash \n NOTE: \n- this feature will be more customizable soon!! \n- you can now toggle this on/off freely."
 		})
 	end
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ActionRemote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Combat"):WaitForChild("Action")
+local Multipliers = ReplicatedStorage:WaitForChild("Settings"):WaitForChild("Multipliers")
+
+local v = false
+local legitKombatEnabled = false
+local loopThread = nil
+
+local mt = getrawmetatable(game)
+local old = mt.__namecall
+setreadonly(mt, false)
+
+mt.__namecall = newcclosure(function(self, ...)
+    local args = {...}
+    local method = getnamecallmethod()
+
+    if self == ActionRemote and method == "FireServer" and legitKombatEnabled then
+        local abilityPath = args[2]
+        local part = args[3]
+        local data = args[5]
+
+        local hasAbility = abilityPath == "Gon:Abilities:1"
+        local hasBestHitCharacter = type(data) == "table" and
+            data.BestHitCharacter ~= nil
+
+        if hasAbility and hasBestHitCharacter then
+            if part == 1 then
+                v = true
+            elseif part == 2 then
+                v = false
+            end
+        end
+    end
+
+    return old(self, ...)
+end)
+
+setreadonly(mt, true)
+
+local function enableLegitKombat2()
+    if legitKombatEnabled then return end
+    legitKombatEnabled = true
+    v = false
+
+    loopThread = task.spawn(function()
+        while legitKombatEnabled do
+            Multipliers.RagdollPower.Value = v and 70 or 100
+            task.wait(0.1)
+        end
+    end)
+end
+
+local function disableLegitKombat2()
+    legitKombatEnabled = false
+    v = false
+    Multipliers.RagdollPower.Value = 100
+    if loopThread then
+        task.cancel(loopThread)
+        loopThread = nil
+    end
+end
+
+LegitKombatSection:AddToggle({
+    Name = "Low Rock Helper",
+    Flag = "LowRockToggle",
+    Default = Cfg.LowRockToggle,
+    Callback = function(val)
+        Cfg.LowRockToggle = val
+        if val then
+            enableLegitKombat2()
+        else
+            disableLegitKombat2()
+        end
+    end
+})
 	
 	task.spawn(function() task.wait(1); initializeHitbox() end)
 	LocalPlayer.CharacterAdded:Connect(function() task.wait(2); initializeHitbox() end)
