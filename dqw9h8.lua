@@ -12638,9 +12638,6 @@ function AbilitySpam4:FindNearestPlayer()
         if p ~= LocalPlayer and p.Character then
             local tr = p.Character:FindFirstChild("HumanoidRootPart")
             local th = p.Character:FindFirstChild("Humanoid")
-			if LocalPlayer:IsFriendsWith(p.UserId) then
-            	continue
-            end
             if tr and th then
                 local hp = th:GetAttribute("Health")
                 if hp and hp > 0 then
