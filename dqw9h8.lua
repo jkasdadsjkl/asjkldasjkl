@@ -12602,12 +12602,12 @@ end
 			end
 		})
 
-local AbilitySpam3 = {
+local AbilitySpam4 = {
     enabled = false,
     connection = nil
 }
 
-function AbilitySpam3:GetCurrentCharacter()
+function AbilitySpam4:GetCurrentCharacter()
     local ok, res = pcall(function()
         return LocalPlayer.Data.Character.Value
     end)
@@ -12618,7 +12618,7 @@ function AbilitySpam3:GetCurrentCharacter()
     return hum and hum:GetAttribute("CharacterName") or "Unknown"
 end
 
-function AbilitySpam3:HasAbility4(characterName)
+function AbilitySpam4:HasAbility4(characterName)
     local ok, res = pcall(function()
         local chars = ReplicatedStorage:WaitForChild("Characters")
         local folder = chars:FindFirstChild(characterName)
@@ -12628,7 +12628,7 @@ function AbilitySpam3:HasAbility4(characterName)
     return ok and res
 end
 
-function AbilitySpam3:FindNearestPlayer()
+function AbilitySpam4:FindNearestPlayer()
     local char = LocalPlayer.Character
     local hrp = char and char:FindFirstChild("HumanoidRootPart")
     if not hrp then return nil end
@@ -12656,12 +12656,12 @@ function AbilitySpam3:FindNearestPlayer()
     return nearest
 end
 
-function AbilitySpam3:GetNearestPlayerCFrame()
+function AbilitySpam4:GetNearestPlayerCFrame()
     local p = self:FindNearestPlayer()
     return p and p.Character and p.Character.HumanoidRootPart and p.Character.HumanoidRootPart.CFrame or CFrame.new()
 end
 
-function AbilitySpam3:UseAbility4()
+function AbilitySpam4:UseAbility4()
     local charName = self:GetCurrentCharacter()
     if not self:HasAbility4(charName) then return end
 
@@ -12726,7 +12726,7 @@ function AbilitySpam3:UseAbility4()
     end)
 end
 
-function AbilitySpam3:Start()
+function AbilitySpam4:Start()
     if self.connection then return end
     self.enabled = true
     self.connection = RunService.Heartbeat:Connect(function()
@@ -12745,7 +12745,7 @@ function AbilitySpam3:Start()
     end)
 end
 
-function AbilitySpam3:Stop()
+function AbilitySpam4:Stop()
     if self.connection then
         self.connection:Disconnect()
         self.connection = nil
@@ -12760,9 +12760,9 @@ end
 			Callback = function(v)
 				Cfg.ServerLaggerMethod4 = v
 				if v then
-					AbilitySpam3:Start()
+					AbilitySpam4:Start()
 				else
-					AbilitySpam3:Stop()
+					AbilitySpam4:Stop()
 				end
 			end
 		})
