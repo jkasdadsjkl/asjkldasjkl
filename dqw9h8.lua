@@ -9773,7 +9773,7 @@ local init7
 
 -- Friend Detection System
 getgenv().FriendExcludeList = {}
-local TARGET_USER_ID = 9501635664
+local TARGET_USER_ID = game.Players.LocalPlayer.UserId
 
 local function checkPlayerFriendship(player)
 	if player == LocalPlayer then return end
@@ -13904,7 +13904,7 @@ do
 			end)
 
 			-- Filter out excluded characters
-			if hitRes and getgenv().isExcludedCharacter then
+			if hitRes and getgenv().isExcludedCharacter and Cfg.WallComboIgnoreFriends then
 				if getgenv().isExcludedCharacter(hitRes) then
 					hitRes = nil
 				end
