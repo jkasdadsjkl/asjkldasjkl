@@ -14476,10 +14476,13 @@ local mt = getrawmetatable(game)
 local old = mt.__namecall
 setreadonly(mt, false)
 
+local AbilityCanceledRemote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Abilities"):WaitForChild("AbilityCanceled")
+
 mt.__namecall = newcclosure(function(self, ...)
     local args = {...}
     local method = getnamecallmethod()
 
+    -- existing check for part 1 and 2
     if self == ActionRemote and method == "FireServer" and legitKombatEnabled then
         local abilityPath = args[2]
         local part = args[3]
@@ -14495,6 +14498,15 @@ mt.__namecall = newcclosure(function(self, ...)
             elseif part == 2 then
                 v = false
             end
+        end
+    end
+
+    -- new check for AbilityCanceled remote
+    if self == AbilityCanceledRemote and method == "FireServer" and legitKombatEnabled then
+        local ability = args[1]
+        if ability and ability.Name == "1" and ability.Parent and ability.Parent.Name == "Abilities" 
+        and ability.Parent.Parent and ability.Parent.Parent.Name == "Gon" then
+            v = false
         end
     end
 
