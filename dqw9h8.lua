@@ -13245,7 +13245,7 @@ do
 					modifiedArg3.Size = newSize
 					local bestTarget, validTargets = originalHitBox(args[1], args[2], modifiedArg3)
 					-- Filter out excluded characters
-					if getgenv().isExcludedCharacter then
+					--[[if getgenv().isExcludedCharacter then
 						if bestTarget and getgenv().isExcludedCharacter(bestTarget) then
 							bestTarget = nil
 						end
@@ -13258,10 +13258,10 @@ do
 						end
 					end
 					return bestTarget, validTargets
-				else
+				else]]
 					local bestTarget, validTargets = originalHitBox(args[1], args[2], {Size = newSize})
 					-- Filter out excluded characters
-					if getgenv().isExcludedCharacter then
+					--[[if getgenv().isExcludedCharacter then
 						if bestTarget and getgenv().isExcludedCharacter(bestTarget) then
 							bestTarget = nil
 						end
@@ -13272,7 +13272,7 @@ do
 								end
 							end
 						end
-					end
+					end]]
 					return bestTarget, validTargets
 				end
 			end
@@ -13306,7 +13306,7 @@ do
 				local bestTarget, validTargets, blockedTargets = originalHitProcess(...)
 				
 				-- Filter out excluded characters
-				if getgenv().isExcludedCharacter then
+				--[[if getgenv().isExcludedCharacter then
 					if bestTarget and getgenv().isExcludedCharacter(bestTarget) then
 						bestTarget = nil
 					end
@@ -13317,7 +13317,7 @@ do
 							end
 						end
 					end
-				end
+				end]]
 				
 				if not validTargets or #validTargets == 0 then
 					return bestTarget, validTargets, blockedTargets
@@ -14469,7 +14469,7 @@ local ActionRemote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Com
 local Multipliers = ReplicatedStorage:WaitForChild("Settings"):WaitForChild("Multipliers")
 
 local v = false
-local legitKombatEnabled = false
+local legitKombatEnabled2 = false
 local loopThread = nil
 
 local mt = getrawmetatable(game)
@@ -14483,7 +14483,7 @@ mt.__namecall = newcclosure(function(self, ...)
     local method = getnamecallmethod()
 
     -- existing check for part 1 and 2
-    if self == ActionRemote and method == "FireServer" and legitKombatEnabled then
+    if self == ActionRemote and method == "FireServer" and legitKombatEnabled2 then
         local abilityPath = args[2]
         local part = args[3]
         local data = args[5]
@@ -14502,7 +14502,7 @@ mt.__namecall = newcclosure(function(self, ...)
     end
 
     -- new check for AbilityCanceled remote
-    if self == AbilityCanceledRemote and method == "FireServer" and legitKombatEnabled then
+    if self == AbilityCanceledRemote and method == "FireServer" and legitKombatEnabled2 then
         local ability = args[1]
         if ability and ability.Name == "1" and ability.Parent and ability.Parent.Name == "Abilities" 
         and ability.Parent.Parent and ability.Parent.Parent.Name == "Gon" then
@@ -14516,12 +14516,12 @@ end)
 setreadonly(mt, true)
 
 local function enableLegitKombat2()
-    if legitKombatEnabled then return end
-    legitKombatEnabled = true
+    if legitKombatEnabled2 then return end
+    legitKombatEnabled2 = true
     v = false
 
     loopThread = task.spawn(function()
-        while legitKombatEnabled do
+        while legitKombatEnabled2 do
             Multipliers.RagdollPower.Value = v and 70 or 100
             task.wait(0.1)
         end
@@ -14529,7 +14529,7 @@ local function enableLegitKombat2()
 end
 
 local function disableLegitKombat2()
-    legitKombatEnabled = false
+    legitKombatEnabled2 = false
     v = false
     Multipliers.RagdollPower.Value = 100
     if loopThread then
