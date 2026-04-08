@@ -11016,11 +11016,6 @@ do
 				task.spawn(scramblePing)
 			end
 		end})
-	
-		local AbilitySpam = {
-    enabled = false,
-    connection = nil
-}
 
 local function autoBlockLoop()
 			local remoteEvent = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Combat"):WaitForChild("Block")
@@ -11038,6 +11033,10 @@ local function autoBlockLoop()
 				task.spawn(autoBlockLoop)
 			end
 		end})
+--[[local AbilitySpam = {
+    enabled = false,
+    connection = nil
+}
 
 function AbilitySpam:GetCurrentCharacter()
     local ok, res = pcall(function()
@@ -11191,165 +11190,7 @@ end
 			else
 				AbilitySpam:Stop()
 			end
-		end})
-	local AbilitySpam3 = {
-    enabled = false,
-    connection = nil
-}
-	function AbilitySpam3:GetCurrentCharacter()
-    local ok, res = pcall(function()
-        return LocalPlayer.Data.Character.Value
-    end)
-    if ok and res then return res end
-
-    local char = LocalPlayer.Character
-    local hum = char and char:FindFirstChildOfClass("Humanoid")
-    return hum and hum:GetAttribute("CharacterName") or "Unknown"
-end
-
-function AbilitySpam3:HasAbility4(characterName)
-    local ok, res = pcall(function()
-        local chars = ReplicatedStorage:WaitForChild("Characters")
-        local folder = chars:FindFirstChild(characterName)
-        local ab = folder and folder:FindFirstChild("Abilities")
-        return ab and ab:FindFirstChild("4") ~= nil
-    end)
-    return ok and res
-end
-
-function AbilitySpam3:FindNearestPlayer()
-    local char = LocalPlayer.Character
-    local hrp = char and char:FindFirstChild("HumanoidRootPart")
-    if not hrp then return nil end
-
-    local nearest, dist = nil, math.huge
-    for _,p in pairs(Players:GetPlayers()) do
-        if p ~= LocalPlayer and p.Character then
-            local tr = p.Character:FindFirstChild("HumanoidRootPart")
-            local th = p.Character:FindFirstChild("Humanoid")
-			if LocalPlayer:IsFriendsWith(p.UserId) then
-            	continue
-            end
-            if tr and th then
-                local hp = th:GetAttribute("Health")
-                if hp and hp > 0 then
-                    local d = (hrp.Position - tr.Position).Magnitude
-                    if d < dist then
-                        dist = d
-                        nearest = p
-                    end
-                end
-            end
-        end
-    end
-    return nearest
-end
-
-function AbilitySpam3:GetNearestPlayerCFrame()
-    local p = self:FindNearestPlayer()
-    return p and p.Character and p.Character.HumanoidRootPart and p.Character.HumanoidRootPart.CFrame or CFrame.new()
-end
-
-function AbilitySpam3:UseAbility4()
-    local charName = self:GetCurrentCharacter()
-    if not self:HasAbility4(charName) then return end
-
-    local target = self:FindNearestPlayer()
-    if not target then return end
-
-    local targetChar = target.Character
-    local targetCF = self:GetNearestPlayerCFrame()
-
-    pcall(function()
-        local ability = ReplicatedStorage.Characters[charName].Abilities["4"]
-        ReplicatedStorage.Remotes.Abilities.Ability:FireServer(ability,9000000)
-
-        local actions = {377,380,383,384,385,387,389}
-        for i=1,7 do
-            local args = {
-                ability,
-                charName..":Abilities:4",
-                i,
-                9000000,
-                {
-                    HitboxCFrames = {targetCF,targetCF},
-                    BestHitCharacter = targetChar,
-                    HitCharacters = {targetChar},
-                    Ignore = i>2 and {ActionNumber1={targetChar}} or {},
-                    DeathInfo = {},
-                    BlockedCharacters = {},
-                    HitInfo = {
-                        IsFacing = not (i==1 or i==2),
-                        IsInFront = i<=2,
-                        Blocked = i>2 and false or nil
-                    },
-                    ServerTime = tick(),
-                    Actions = i>2 and {ActionNumber1={}} or {},
-                    FromCFrame = targetCF
-                },
-                "Action"..actions[i],
-                i==2 and 0.1 or nil
-            }
-
-            if i==7 then
-                args[5].RockCFrame = targetCF
-                args[5].Actions = {
-                    ActionNumber1 = {
-                        [target.Name] = {
-                            StartCFrameStr = tostring(targetCF.X)..","..tostring(targetCF.Y)..","..tostring(targetCF.Z)..",0,0,0,0,0,0,0,0,0",
-                            ImpulseVelocity = Vector3.new(1901,-25000,291),
-                            AbilityName = "4",
-                            RotVelocityStr = "0,0,0",
-                            VelocityStr = "1.900635,0.010867,0.291061",
-                            Duration = 2,
-                            RotImpulseVelocity = Vector3.new(5868,-6649,-7414),
-                            Seed = math.random(1,1e6),
-                            LookVectorStr = "0.988493,0,0.151268"
-                        }
-                    }
-                }
-            end
-
-            ReplicatedStorage.Remotes.Combat.Action:FireServer(unpack(args))
-        end
-    end)
-end
-
-function AbilitySpam3:Start()
-    if self.enabled then return end
-    self.enabled = true
-    task.spawn(function()
-        while self.enabled do
-            pcall(function()
-                self:UseAbility4()
-            end)
-            task.wait(0.1)
-            if self.enabled then
-                pcall(function()
-                    local c = self:GetCurrentCharacter()
-                    ReplicatedStorage.Remotes.Abilities.AbilityCanceled:FireServer(
-                        ReplicatedStorage.Characters[c].Abilities["4"]
-                    )
-                end)
-            end
-        end
-    end)
-end
-
-
-function AbilitySpam3:Stop()
-    self.enabled = false
-end
-	
-		ExploitSection:AddToggle({ Name = "kill aura v4(best with mob)", Flag = "AutoBlock1", Default = Cfg.AutoBlock1, Callback = function(v)
-			Cfg.AutoBlock1 = v
-			if v then
-				AbilitySpam3:Start()
-			else
-				AbilitySpam3:Stop()
-			end
-		end})
-	
+		end})]]
 		local isInvisible = false
 		local platform = nil
 		local mirrorModel = nil
@@ -11698,7 +11539,7 @@ end
 		end
 
 		-- Wall Combo Function
-		local function wallcomboveryez()
+		function wallcomboveryez()
 			local function findUltimateBum()
 			local characters = Workspace:FindFirstChild("Characters")
 			if not characters then return nil end
@@ -11789,7 +11630,7 @@ end
 			return true
 		end
 
-		local function wallcomboveryez1()
+		function wallcomboveryez1()
 			local function findUltimateBum()
 			local characters = Workspace:FindFirstChild("Characters")
 			if not characters then return nil end
@@ -11880,7 +11721,7 @@ end
 			return true
 		end
 
-		local function wallcomboveryez2()
+		function wallcomboveryez2()
 			local function findUltimateBum()
 			local characters = Workspace:FindFirstChild("Characters")
 			if not characters then return nil end
@@ -11934,50 +11775,53 @@ end
 			local serverTime = getServerTime()
 			local randomId = math.random(100000, 999999)
 
-			-- Prepare the full remote arguments
-			local remoteArgs = {
-				wallComboAbility,
-				"Characters:" .. charValue .. ":WallCombo",
-				1,
-				randomId,
-				{
-					HitboxCFrames = {nil},
-					BestHitCharacter = ultimateBum2,
-					HitCharacters = {ultimateBum2},
-					Ignore = {[actionNumber] = {ultimateBum2}},
-					DeathInfo = {},
-					Actions = {[actionNumber] = {}},
-					HitInfo = {
-						Blocked = false,
-						IsFacing = true,
-						IsInFront = true
+			for i=1,4 do
+				local remoteArgs = {
+					wallComboAbility,
+					"Characters:" .. charValue .. ":WallCombo",
+					i,
+					randomId,
+					{
+						HitboxCFrames = {nil},
+						BestHitCharacter = ultimateBum2,
+						HitCharacters = {ultimateBum2},
+						Ignore = {},
+						DeathInfo = {},
+						Actions = {[actionNumber] = {}},
+						HitInfo = {
+							Blocked = false,
+							IsFacing = true,
+							IsInFront = true
+						},
+						BlockedCharacters = {},
+						ServerTime = serverTime,
+						FromCFrame = nil
 					},
-					BlockedCharacters = {},
-					ServerTime = serverTime,
-					FromCFrame = nil
-				},
-				actionNumber
-			}
+					actionNumber
+				}
 
-			-- Fire remotes for full damage
-			local remote1Success = pcall(function()
-				ReplicatedStorage.Remotes.Abilities.Ability:FireServer(wallComboAbility, randomId)
-			end)
+				-- Fire remotes for full damage
+				local remote1Success = pcall(function()
+					ReplicatedStorage.Remotes.Abilities.Ability:FireServer(wallComboAbility, randomId)
+				end)
 
-			local remote2Success = pcall(function()
-				ReplicatedStorage.Remotes.Combat.Action:FireServer(unpack(remoteArgs))
-			end)
-		
-			return true
+				local remote2Success = pcall(function()
+					ReplicatedStorage.Remotes.Combat.Action:FireServer(unpack(remoteArgs))
+				end)
+			
+				return true
+			end
 		end
+
+		local targetIndex = 1
 
 		local function wallcomboveryez3()
 			local function GetClosestPlayer()
-				local closest
-				local shortest = math.huge
 				local lpChar = LocalPlayer.Character
 				local lpHRP = lpChar and lpChar:FindFirstChild("HumanoidRootPart")
 				if not lpHRP then return nil end
+
+				local playerDistances = {}
 
 				for _, plr in ipairs(Players:GetPlayers()) do
 					if plr ~= LocalPlayer then
@@ -11986,14 +11830,26 @@ end
 						local hrp = char and char:FindFirstChild("HumanoidRootPart")
 						if hum and hrp and hum.Health > 0 then
 							local dist = (hrp.Position - lpHRP.Position).Magnitude
-							if dist < shortest then
-								shortest = dist
-								closest = plr
-							end
+							table.insert(playerDistances, {player = plr, dist = dist})
 						end
 					end
 				end
-				return closest
+
+				table.sort(playerDistances, function(a, b)
+					return a.dist < b.dist
+				end)
+
+				-- get current index target
+				local target = playerDistances[targetIndex] and playerDistances[targetIndex].player or nil
+
+				-- cycle to next index for next call
+				if targetIndex >= math.min(3, #playerDistances) then
+					targetIndex = 1
+				else
+					targetIndex = targetIndex + 1
+				end
+
+				return target
 			end
 			local playerChar = LocalPlayer.Character
 			if not playerChar then 
@@ -12078,13 +11934,16 @@ end
 			task.spawn(function()
 				while godModesActive do
 					pcall(wallcomboveryez)
-					task.wait(0.05)
+					task.wait(0.04)
 					pcall(wallcomboveryez1)
-					task.wait(0.05)
+					task.wait(0.04)
 					pcall(wallcomboveryez2)
-					task.wait(0.05)
+					task.wait(0.04)
 					pcall(wallcomboveryez3)
-					task.wait(0.05)
+					task.wait(0.04)
+					pcall(wallcomboveryez3)
+					task.wait(0.04)
+					pcall(wallcomboveryez3)
 				end
 			end)
 			
@@ -12236,6 +12095,445 @@ end
 			end
 		end})
 	end
+local KillAuraTab = DualTab4:DrawTab({ Name = "Kill Aura", Type = "Single", EnableScrolling = true })
+local KillAuraSection =KillAuraTab:DrawSection({ Name = "Kill Aura Methods" })
+local AbilitySpam5 = {
+    enabled = false,
+    connection = nil
+}
+	function AbilitySpam5:GetCurrentCharacter()
+    local ok, res = pcall(function()
+        return LocalPlayer.Data.Character.Value
+    end)
+    if ok and res then return res end
+
+    local char = LocalPlayer.Character
+    local hum = char and char:FindFirstChildOfClass("Humanoid")
+    return hum and hum:GetAttribute("CharacterName") or "Unknown"
+end
+
+function AbilitySpam5:HasAbility4(characterName)
+    local ok, res = pcall(function()
+        local chars = ReplicatedStorage:WaitForChild("Characters")
+        local folder = chars:FindFirstChild(characterName)
+        local ab = folder and folder:FindFirstChild("Abilities")
+        return ab and ab:FindFirstChild("4") ~= nil
+    end)
+    return ok and res
+end
+
+function AbilitySpam5:FindNearestPlayer()
+    local char = LocalPlayer.Character
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return nil end
+
+    local nearest, dist = nil, math.huge
+    for _,p in pairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer and p.Character then
+            local tr = p.Character:FindFirstChild("HumanoidRootPart")
+            local th = p.Character:FindFirstChild("Humanoid")
+            if tr and th then
+                local hp = th:GetAttribute("Health")
+                if hp and hp > 0 then
+                    local d = (hrp.Position - tr.Position).Magnitude
+                    if d < dist then
+                        dist = d
+                        nearest = p
+                    end
+                end
+            end
+        end
+    end
+    return nearest
+end
+
+function AbilitySpam5:GetNearestPlayerCFrame()
+    local p = self:FindNearestPlayer()
+    return p and p.Character and p.Character.HumanoidRootPart and p.Character.HumanoidRootPart.CFrame or CFrame.new()
+end
+function AbilitySpam5:GetPlayerCFrame()
+    local p = LocalPlayer
+    return p and p.Character and p.Character.HumanoidRootPart and p.Character.HumanoidRootPart.CFrame or CFrame.new()
+end
+
+function AbilitySpam5:UseAbility4()
+    local charName = self:GetCurrentCharacter()
+    if not self:HasAbility4(charName) then return end
+
+    local target = self:FindNearestPlayer()
+    if not target then return end
+
+    local targetChar = target.Character
+    local targetCF = self:GetNearestPlayerCFrame()
+
+    pcall(function()
+        local ability = ReplicatedStorage.Characters[charName].WallCombo
+		local abilityRemote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Abilities"):WaitForChild("Ability")
+		local head = targetChar:FindFirstChild("Head")
+        local abilityArgs = {
+            ability,
+            9000000,
+            [4] = targetChar,
+            [5] = head.Position + Vector3.new(0,0,2.5)
+        }
+        abilityRemote:FireServer(unpack(abilityArgs, 1, 5))
+        for i=1,4 do
+            local args = {
+                ability,
+                "Characters:"..charName..":WallCombo",
+                i,
+                9000000,
+                {
+                    HitboxCFrames = i>1 and {targetCF,targetCF} or {},
+                    BestHitCharacter = targetChar,
+                    HitCharacters = {targetChar},
+                    Ignore = i>1 and i<4 and {ActionNumber1={targetChar}} or {},
+                    DeathInfo = {},
+                    BlockedCharacters = {},
+                    HitInfo = {
+                        IsFacing = true,
+                        IsInFront = true,
+                        Blocked = false
+                    },
+                    ServerTime = tick(),
+                    Actions = i>1 and {ActionNumber1={}} or {},
+                    FromCFrame = targetCF
+                },
+                "Action".. math.random(1000, 9999),
+                i==2 and 0.1 or nil
+            }
+
+            if i==4 then
+                args[5].RockCFrame = targetCF
+                args[5].Actions = {
+                    ActionNumber1 = {
+                        [target.Name] = {
+                            StartCFrameStr = tostring(targetCF.X)..","..tostring(targetCF.Y)..","..tostring(targetCF.Z)..",0,0,0,0,0,0,0,0,0",
+                            ImpulseVelocity = Vector3.new(1901,-25000,291),
+                            AbilityName = "WallCombo",
+                            RotVelocityStr = "0,0,0",
+                            VelocityStr = "1.900635,0.010867,0.291061",
+                            Duration = 2,
+                            RotImpulseVelocity = Vector3.new(5868,-6649,-7414),
+                            Seed = math.random(1,1e6),
+                            LookVectorStr = "0.988493,0,0.151268"
+                        }
+                    }
+                }
+            end
+
+            ReplicatedStorage.Remotes.Combat.Action:FireServer(unpack(args))
+        end
+    end)
+end
+function AbilitySpam5:fullcustom()
+    local targetCF = self:GetNearestPlayerCFrame()
+	local args = {
+    tick(),
+    targetCF,
+    false,
+	nil,
+    [5] = game:GetService("Players").LocalPlayer.Character
+	}
+	ReplicatedStorage.Remotes.Replication.FullCustomReplicationUnreliable:FireServer(unpack(args, 1, 5))
+end
+
+
+function AbilitySpam5:Start()
+    if self.enabled then return end
+    self.enabled = true
+    task.spawn(function()
+        while self.enabled do
+            pcall(function()
+                self:fullcustom()
+            end)
+			task.wait(0.000001)
+			pcall(wallcomboveryez)
+			pcall(wallcomboveryez1)
+			pcall(wallcomboveryez2)
+			pcall(function()
+                self:UseAbility4()
+            end)
+			task.wait(0.05)
+        end
+    end)
+end
+
+
+function AbilitySpam5:Stop()
+    self.enabled = false
+end
+	
+		KillAuraSection:AddToggle({ Name = "[BETA]kill aura V3(best with gon)", Flag = "KillAuraV3", Default = Cfg.KillAuraV3, Callback = function(v)
+			Cfg.KillAuraV3 = v
+			if v then
+				AbilitySpam5:Start()
+			else
+				AbilitySpam5:Stop()
+			end
+		end})
+		KillAuraSection:AddParagraph({
+			Title = "Kill aura V3",
+			Content = "This Kill aura automatically gives you godmode and has inf range\n Automatically Serverlags if it detects a godmode user that it cant kill"
+		})
+	local AbilitySpam3 = {
+    enabled = false,
+    connection = nil
+}
+	function AbilitySpam3:GetCurrentCharacter()
+    local ok, res = pcall(function()
+        return LocalPlayer.Data.Character.Value
+    end)
+    if ok and res then return res end
+
+    local char = LocalPlayer.Character
+    local hum = char and char:FindFirstChildOfClass("Humanoid")
+    return hum and hum:GetAttribute("CharacterName") or "Unknown"
+end
+
+function AbilitySpam3:HasAbility4(characterName)
+    local ok, res = pcall(function()
+        local chars = ReplicatedStorage:WaitForChild("Characters")
+        local folder = chars:FindFirstChild(characterName)
+        local ab = folder and folder:FindFirstChild("Abilities")
+        return ab and ab:FindFirstChild("4") ~= nil
+    end)
+    return ok and res
+end
+function AbilitySpam3:FindNearestPlayer2()
+    local char = LocalPlayer.Character
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return nil end
+
+    local nearest, dist = nil, math.huge
+    for _,p in pairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer and p.Character then
+            local tr = p.Character:FindFirstChild("HumanoidRootPart")
+            local th = p.Character:FindFirstChild("Humanoid")
+            if tr and th then
+                local hp = th:GetAttribute("Health")
+                if hp and hp > 0 then
+                    local d = (hrp.Position - tr.Position).Magnitude
+                    if d < dist then
+                        dist = d
+                        nearest = p
+                    end
+                end
+            end
+        end
+    end
+    return nearest
+end
+local targetnumber = 1
+cachedTarget = nil
+function AbilitySpam3:FindNearestPlayer()
+    local char = LocalPlayer.Character
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return nil end
+
+    local playersName = {}
+
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer and p.Character then
+            local tr = p.Character:FindFirstChild("HumanoidRootPart")
+            local th = p.Character:FindFirstChild("Humanoid")
+            if tr and th then
+                local hp = th:GetAttribute("Health")
+                if hp then
+                    table.insert(playersName, p)
+                end
+            end
+        end
+    end
+
+    -- sort by username alphabetically
+    table.sort(playersName, function(a, b)
+        return a.Name < b.Name
+    end)
+
+	local target10 = playersName[targetnumber] or nil
+
+		-- cycle to next index for next call
+		if targetnumber >= math.min(14, #playersName) then
+			targetnumber = 1
+		else
+			targetnumber = targetnumber + 1
+		end
+
+	return target10
+end
+local cycleCount = 0
+local cyclesPerTarget = 16 -- how many times to hit same player before switching
+
+function AbilitySpam3:SelectNextTarget()
+    if cycleCount >= cyclesPerTarget then
+        cycleCount = 0
+        cachedTarget = self:FindNearestPlayer()
+    else
+        cycleCount = cycleCount + 1
+        if not cachedTarget then
+            cachedTarget = self:FindNearestPlayer()
+        end
+    end
+end
+function AbilitySpam3:GetCurrentTarget()
+    return cachedTarget
+end
+
+
+function AbilitySpam3:GetNearestPlayerCFrame()
+    local p = self:GetCurrentTarget()
+    return p and p.Character and p.Character.HumanoidRootPart and p.Character.HumanoidRootPart.CFrame or CFrame.new()
+end
+function AbilitySpam3:fullcustom()
+    local targetCF = self:GetNearestPlayerCFrame()
+	local args = {
+    tick(),
+    targetCF,
+    false,
+	nil,
+    [5] = game:GetService("Players").LocalPlayer.Character
+	}
+	ReplicatedStorage.Remotes.Replication.FullCustomReplicationUnreliable:FireServer(unpack(args, 1, 5))
+end
+
+function AbilitySpam3:UseAbility4()
+    local charName = self:GetCurrentCharacter()
+    if not self:HasAbility4(charName) then return end
+
+    local target = self:GetCurrentTarget()
+    if not target then return end
+
+    local targetChar = target.Character
+    local targetCF = self:GetNearestPlayerCFrame()
+		pcall(function()
+			local ability = ReplicatedStorage.Characters[charName].Abilities["4"]
+			ReplicatedStorage.Remotes.Abilities.Ability:FireServer(ability,9000000)
+
+			local actions = {377,380,383,384,385,387,389}
+		for i=1,7 do
+			local args = {
+				ability,
+				charName..":Abilities:4",
+				i,
+				9000000,
+				{
+					HitboxCFrames = {targetCF,targetCF},
+					BestHitCharacter = targetChar,
+					HitCharacters = {targetChar},
+					Ignore = i>2 and {ActionNumber1={targetChar}} or {},
+					DeathInfo = {},
+					BlockedCharacters = {},
+					HitInfo = {
+						IsFacing = not (i==1 or i==2),
+						IsInFront = i<=2,
+						Blocked = i>2 and false or nil
+					},
+					ServerTime = tick(),
+					Actions = i>2 and {ActionNumber1={}} or {},
+					FromCFrame = targetCF
+				},
+				"Action"..actions[i],
+				i==2 and 0.1 or nil
+			}
+
+			if i==7 then
+				args[5].RockCFrame = targetCF
+				args[5].Actions = {
+					ActionNumber1 = {
+						[target.Name] = {
+							StartCFrameStr = tostring(targetCF.X)..","..tostring(targetCF.Y)..","..tostring(targetCF.Z)..",0,0,0,0,0,0,0,0,0",
+							ImpulseVelocity = Vector3.new(1901,-25000,291),
+							AbilityName = "4",
+							RotVelocityStr = "0,0,0",
+							VelocityStr = "1.900635,0.010867,0.291061",
+							Duration = 2,
+							RotImpulseVelocity = Vector3.new(5868,-6649,-7414),
+							Seed = math.random(1,1e6),
+							LookVectorStr = "0.988493,0,0.151268"
+						}
+					}
+				}
+			end
+
+			ReplicatedStorage.Remotes.Combat.Action:FireServer(unpack(args))
+		end
+	end)
+end
+function AbilitySpam3:tp()
+	task.spawn(function()
+		local currentHrp = (HRP and HRP()) or (LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart"))
+		if currentHrp then
+			ReplicatedStorage.Remotes.Character.Dash:FireServer(unpack({[1]=CFrame.new(0,0,0),[2]="R",[3]=nil,[5]=nil}))
+			task.wait()
+			currentHrp.CFrame = CFrame.new(500, 10000, 460)
+		else
+			task.wait()
+		end
+		task.wait(2)
+	end)
+end
+
+function AbilitySpam3:Start()
+    if self.enabled then return end
+    self.enabled = true
+    local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+    if not hrp then return end
+    savedPosition_lagger1 = hrp.CFrame
+    hrp.CollisionGroup = "None"
+
+    task.spawn(function()
+        while self.enabled do
+            pcall(function() self:SelectNextTarget() end)
+            task.wait()
+            pcall(function() self:tp() end)
+            pcall(function() self:fullcustom() end)
+            task.wait()
+            pcall(function() self:UseAbility4() end)
+            if self.enabled then
+                pcall(function()
+                    local c = self:GetCurrentCharacter()
+                    ReplicatedStorage.Remotes.Abilities.AbilityCanceled:FireServer(
+                        ReplicatedStorage.Characters[c].Abilities["4"]
+                    )
+                end)
+            end
+            task.wait(0.05)
+        end
+    end)
+end
+
+
+function AbilitySpam3:Stop()
+    self.enabled = false
+	local hrp = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+	if not hrp then return end
+	
+	hrp.CFrame = CFrame.new(0, -120, 0)
+	LocalPlayer.Character:WaitForChild("HumanoidRootPart")
+	hrp.CollisionGroup = "None"
+	task.wait(0.2)
+	
+	if savedPosition_lagger1 then
+		hrp.CFrame = savedPosition_lagger1
+	end
+	
+	hrp.CollisionGroup = "Characters"
+end
+	
+		KillAuraSection:AddToggle({ Name = "Kill Farm(best with mob)", Flag = "KillFarmBest", Default = Cfg.KillFarmBest, Callback = function(v)
+			Cfg.KillFarmBest = v
+			if v then
+				AbilitySpam3:Start()
+			else
+				AbilitySpam3:Stop()
+			end
+		end})
+		KillAuraSection:AddParagraph({
+			Title = "Kill Farm",
+			Content = "Automatically telports you far from anyone\n kills Any GodMode that isnt grabbing Player/Dummy\n Automatically Serverlags if it detects a godmode user that it cant kill"
+		})
+	
 
 	-- Server Lagger Child Tab
 	do
@@ -13245,7 +13543,7 @@ do
 					modifiedArg3.Size = newSize
 					local bestTarget, validTargets = originalHitBox(args[1], args[2], modifiedArg3)
 					-- Filter out excluded characters
-					--[[if getgenv().isExcludedCharacter then
+					if getgenv().isExcludedCharacter and Cfg.HitboxIgnoreFriends then
 						if bestTarget and getgenv().isExcludedCharacter(bestTarget) then
 							bestTarget = nil
 						end
@@ -13258,10 +13556,10 @@ do
 						end
 					end
 					return bestTarget, validTargets
-				else]]
+				else
 					local bestTarget, validTargets = originalHitBox(args[1], args[2], {Size = newSize})
 					-- Filter out excluded characters
-					--[[if getgenv().isExcludedCharacter then
+					if getgenv().isExcludedCharacter and Cfg.HitboxIgnoreFriends then
 						if bestTarget and getgenv().isExcludedCharacter(bestTarget) then
 							bestTarget = nil
 						end
@@ -13272,7 +13570,7 @@ do
 								end
 							end
 						end
-					end]]
+					end
 					return bestTarget, validTargets
 				end
 			end
@@ -13306,7 +13604,7 @@ do
 				local bestTarget, validTargets, blockedTargets = originalHitProcess(...)
 				
 				-- Filter out excluded characters
-				--[[if getgenv().isExcludedCharacter then
+				if getgenv().isExcludedCharacter and Cfg.HitboxIgnoreFriends then
 					if bestTarget and getgenv().isExcludedCharacter(bestTarget) then
 						bestTarget = nil
 					end
@@ -13317,7 +13615,7 @@ do
 							end
 						end
 					end
-				end]]
+				end
 				
 				if not validTargets or #validTargets == 0 then
 					return bestTarget, validTargets, blockedTargets
@@ -13441,6 +13739,7 @@ do
 	addSizeSlider("Z Size", "HitboxZ", "Size3")
 	
 	Section1:AddToggle({ Name = "Hitbox Visualizer", Flag = "HitboxVisualizer", Default = Cfg.HitboxVisualizer, Callback = function(v) Cfg.HitboxVisualizer = v; getgenv().HitboxVisualizer = v end })
+	Section1:AddToggle({ Name = "Ignore Friends", Flag = "HitboxIgnoreFriends", Default = Cfg.HitboxIgnoreFriends, Callback = function(v) Cfg.HitboxIgnoreFriends = v end})
 	
 	do
 		local spamming, dashActive = false, false
