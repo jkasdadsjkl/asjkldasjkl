@@ -11828,7 +11828,7 @@ end
 						local char = plr.Character
 						local hum = char and char:FindFirstChildOfClass("Humanoid")
 						local hrp = char and char:FindFirstChild("HumanoidRootPart")
-						if hum and hrp and hum.Health > 0 then
+						if hum and hrp then
 							local dist = (hrp.Position - lpHRP.Position).Magnitude
 							table.insert(playerDistances, {player = plr, dist = dist})
 						end
