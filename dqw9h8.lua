@@ -13,7 +13,7 @@ local WhitelistedHWIDs = {
 	"1FBA1C58-AEE7-4C13-A7DB-6C3A07F7AE4D",
 	"3c9fb4b8-2bf4-4096-8b0c-62fe0a04b12d",
 	"f93f77f4-c432-4d2b-82f1-1015cafd8a98",
-	"f9ed0b20-8a58-4e3c-8522-016bee2a7659"
+	"0626fdc8-8013-492b-8cc4-0bf72a46f745"
 }
 
 local isWhitelisted = false
