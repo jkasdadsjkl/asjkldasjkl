@@ -12364,7 +12364,7 @@ function AbilitySpam3:FindNearestPlayer()
 	return target10
 end
 local cycleCount = 0
-local cyclesPerTarget = 16 -- how many times to hit same player before switching
+local cyclesPerTarget = 12 -- how many times to hit same player before switching
 
 function AbilitySpam3:SelectNextTarget()
     if cycleCount >= cyclesPerTarget then
@@ -12385,6 +12385,21 @@ end
 function AbilitySpam3:GetNearestPlayerCFrame()
     local p = self:GetCurrentTarget()
     return p and p.Character and p.Character.HumanoidRootPart and p.Character.HumanoidRootPart.CFrame or CFrame.new()
+end
+function AbilitySpam3:GetPlayerCFrame()
+    local p = LocalPlayer
+    return p and p.Character and p.Character.HumanoidRootPart and p.Character.HumanoidRootPart.CFrame or CFrame.new()
+end
+function AbilitySpam3:fullcustom2()
+    local targetCF = self:GetPlayerCFrame()
+	local args = {
+    tick(),
+    targetCF,
+    false,
+	nil,
+    [5] = game:GetService("Players").LocalPlayer.Character
+	}
+	ReplicatedStorage.Remotes.Replication.FullCustomReplicationUnreliable:FireServer(unpack(args, 1, 5))
 end
 function AbilitySpam3:fullcustom()
     local targetCF = self:GetNearestPlayerCFrame()
@@ -12486,6 +12501,7 @@ function AbilitySpam3:Start()
     task.spawn(function()
         while self.enabled do
             pcall(function() self:SelectNextTarget() end)
+			pcall(function() self:fullcustom2() end)
             task.wait()
             pcall(function() self:tp() end)
             pcall(function() self:fullcustom() end)
