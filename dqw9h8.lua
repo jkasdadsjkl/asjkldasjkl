@@ -11126,7 +11126,7 @@ function AbilitySpam:UseAbility4()
                         IsInFront = i<=2,
                         Blocked = i>2 and false or nil
                     },
-                    ServerTime = tick(),
+                    ServerTime = workspace:GetServerTimeNow(),
                     Actions = i>2 and {ActionNumber1={}} or {},
                     FromCFrame = targetCF
                 },
@@ -11536,7 +11536,7 @@ end
 
 		-- Function to get current server time
 		local function getServerTime()
-			return tick()
+			return workspace:GetServerTimeNow()
 		end
 
 		-- Wall Combo Function
@@ -11982,7 +11982,7 @@ end
 
 -- Function to get current server time
 local function getServerTime()
-    return tick()
+    return workspace:GetServerTimeNow()
 end
 
 -- Wall Combo Function
@@ -12096,8 +12096,13 @@ end
 			end
 		end})
 	end
-local KillAuraTab = DualTab4:DrawTab({ Name = "Kill Aura", Type = "Single", EnableScrolling = true })
-local KillAuraSection =KillAuraTab:DrawSection({ Name = "Kill Aura Methods" })
+local KillAuraTab = DualTab4:DrawTab({ Name = "Kill Aura", Type = "Double", EnableScrolling = true })
+local KillAuraSection = KillAuraTab:DrawSection({ Name = "Kill Aura V3", Position = 'left', EnableScrolling = true })
+local TrollSection = KillAuraTab:DrawSection({ Name = "Troll Stuff", Position = 'right', EnableScrolling = true })
+TrollSection:AddParagraph({
+			Title = "COMING SOON",
+			Content = "Will Be added next update"
+		})
 local AbilitySpam5 = {
     enabled = false,
     connection = nil
@@ -12134,7 +12139,7 @@ function AbilitySpam5:FindNearestPlayer(targetnumber)
         if p ~= LocalPlayer and p.Character then
             local tr = p.Character:FindFirstChild("HumanoidRootPart")
             local th = p.Character:FindFirstChild("Humanoid")
-			if LocalPlayer:IsFriendsWith(p.UserId) then
+			if LocalPlayer:IsFriendsWith(p.UserId) and Cfg.KillAuraV3IgnoreFriends then
             	continue
             end
             if tr and th then
@@ -12159,7 +12164,12 @@ function AbilitySpam5:GetNearestPlayerCFrame(number2)
     local p = self:FindNearestPlayer(number2)
     return p and p.Character and p.Character.HumanoidRootPart and p.Character.HumanoidRootPart.CFrame or CFrame.new()
 end
-function AbilitySpam5:UseAbility4(number3)
+playercframe2 = nil
+function AbilitySpam5:GetPlayerCFrame()
+    local p = LocalPlayer
+    playercframe2 = p and p.Character and p.Character.HumanoidRootPart and p.Character.HumanoidRootPart.CFrame or CFrame.new()
+end
+function AbilitySpam5:WallCombo(number3)
     local charName = self:GetCurrentCharacter()
     if not self:HasAbility4(charName) then return end
 
@@ -12175,6 +12185,8 @@ function AbilitySpam5:UseAbility4(number3)
 			pcall(function() self:fullcustom(number3)  end)
 			task.wait()
 			pcall(function()
+				local targetCF = self:GetNearestPlayerCFrame(number3)
+				local servertime = workspace:GetServerTimeNow()
 				local ability = ReplicatedStorage.Characters[charName].WallCombo
 				local abilityRemote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Abilities"):WaitForChild("Ability")
 				local head = targetChar:FindFirstChild("Head")
@@ -12192,7 +12204,7 @@ function AbilitySpam5:UseAbility4(number3)
 						i,
 						9000000,
 						{
-							HitboxCFrames = {},
+							HitboxCFrames = i>1 and {targetCF,targetCF} or {},
 							BestHitCharacter = targetChar,
 							HitCharacters = {targetChar},
 							Ignore = i>1 and i<4 and {ActionNumber1={targetChar}} or {},
@@ -12203,7 +12215,7 @@ function AbilitySpam5:UseAbility4(number3)
 								IsInFront = true,
 								Blocked = false
 							},
-							ServerTime = tick(),
+							ServerTime = servertime,
 							Actions = i>1 and {ActionNumber1={}} or {},
 							FromCFrame = targetCF
 						},
@@ -12237,7 +12249,8 @@ function AbilitySpam5:UseAbility4(number3)
 				local ability = ReplicatedStorage.Characters[charName].WallCombo
 				local abilityRemote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Abilities"):WaitForChild("Ability")
 				local head = targetChar:FindFirstChild("Head")
-				for i=1,60 do
+				local servertime = workspace:GetServerTimeNow()
+				for i=1,50 do
 					local abilityArgs = {
 					ability,
 					9000000,
@@ -12262,7 +12275,7 @@ function AbilitySpam5:UseAbility4(number3)
 								IsInFront = true,
 								Blocked = false
 							},
-							ServerTime = tick(),
+							ServerTime = servertime,
 							Actions = i>1 and {ActionNumber1={}} or {},
 							FromCFrame = targetCF
 						},
@@ -12291,19 +12304,113 @@ function AbilitySpam5:UseAbility4(number3)
 
 					ReplicatedStorage.Remotes.Combat.Action:FireServer(unpack(args))
 				end
+				local targetCF2 = playercframe2
+					local args2 = {
+					servertime,
+					targetCF2,
+					false,
+					nil,
+					[5] = game:GetService("Players").LocalPlayer.Character
+					}
+					ReplicatedStorage.Remotes.Replication.FullCustomReplicationUnreliable:FireServer(unpack(args2, 1, 5))
 			end)
 		end
 	end
 end
-playercframe2 = nil
-function AbilitySpam5:GetPlayerCFrame()
-    local p = LocalPlayer
-    playercframe2 = p and p.Character and p.Character.HumanoidRootPart and p.Character.HumanoidRootPart.CFrame or CFrame.new()
-end
+function AbilitySpam5:UseAbility4(number8)
+		local charName = self:GetCurrentCharacter()
+		if not self:HasAbility4(charName) then return end
+
+		local target = self:FindNearestPlayer(number8)
+		if not target then return end
+
+		local targetChar = target.Character
+		local targetCF = self:GetNearestPlayerCFrame(number8)
+		local th = target.Character:FindFirstChild("Humanoid")
+		if th then
+		local hp = th:GetAttribute("Health")
+			if hp > 0 then
+				for j=1,12 do
+					pcall(function() self:fullcustom(number8) end)
+					task.wait()
+					pcall(function()
+						local ability = ReplicatedStorage.Characters[charName].Abilities["4"]
+						ReplicatedStorage.Remotes.Abilities.Ability:FireServer(ability,9000000)
+						local servertime = workspace:GetServerTimeNow()
+
+						local actions = {377,380,383,384,385,387,389}
+					for i=1,7 do
+						local args = {
+							ability,
+							charName..":Abilities:4",
+							i,
+							9000000,
+							{
+								HitboxCFrames = {targetCF,targetCF},
+								BestHitCharacter = targetChar,
+								HitCharacters = {targetChar},
+								Ignore = i>2 and {ActionNumber1={targetChar}} or {},
+								DeathInfo = {},
+								BlockedCharacters = {},
+								HitInfo = {
+									IsFacing = not (i==1 or i==2),
+									IsInFront = i<=2,
+									Blocked = i>2 and false or nil
+								},
+								ServerTime = servertime,
+								Actions = i>2 and {ActionNumber1={}} or {},
+								FromCFrame = targetCF
+							},
+							"Action"..actions[i],
+							i==2 and 0.1 or nil
+						}
+
+						if i==7 then
+							args[5].RockCFrame = targetCF
+							args[5].Actions = {
+								ActionNumber1 = {
+									[target.Name] = {
+										StartCFrameStr = tostring(targetCF.X)..","..tostring(targetCF.Y)..","..tostring(targetCF.Z)..",0,0,0,0,0,0,0,0,0",
+										ImpulseVelocity = Vector3.new(1901,-25000,291),
+										AbilityName = "4",
+										RotVelocityStr = "0,0,0",
+										VelocityStr = "1.900635,0.010867,0.291061",
+										Duration = 2,
+										RotImpulseVelocity = Vector3.new(5868,-6649,-7414),
+										Seed = math.random(1,1e6),
+										LookVectorStr = "0.988493,0,0.151268"
+									}
+								}
+							}
+						end
+
+						ReplicatedStorage.Remotes.Combat.Action:FireServer(unpack(args))
+						end
+						pcall(function()
+						local c = self:GetCurrentCharacter()
+						ReplicatedStorage.Remotes.Abilities.AbilityCanceled:FireServer(
+							ReplicatedStorage.Characters[c].Abilities["4"]
+						)
+						end)
+						local targetCF2 = playercframe2
+							local args2 = {
+							servertime,
+							targetCF2,
+							false,
+							nil,
+							[5] = game:GetService("Players").LocalPlayer.Character
+							}
+							ReplicatedStorage.Remotes.Replication.FullCustomReplicationUnreliable:FireServer(unpack(args2, 1, 5))
+					end)
+				end
+			end
+		end
+	end
 function AbilitySpam5:fullcustom2()
     local targetCF2 = playercframe2
+	local servertime = workspace:GetServerTimeNow()
 	local args = {
-    tick(),
+    servertime,
     targetCF2,
     false,
 	nil,
@@ -12313,8 +12420,9 @@ function AbilitySpam5:fullcustom2()
 end
 function AbilitySpam5:fullcustom(number1)
     local targetCF = self:GetNearestPlayerCFrame(number1)
+	local servertime = workspace:GetServerTimeNow()
 	local args = {
-    tick(),
+    servertime,
     targetCF,
     false,
 	nil,
@@ -12325,37 +12433,69 @@ end
 
 
 function AbilitySpam5:Start()
-    if self.enabled then return end
-    self.enabled = true
-    task.spawn(function()
-		pcall(function() self:GetPlayerCFrame()  end)
-		while self.enabled do
-			for i=1,14 do
-				pcall(function() self:UseAbility4(i)  end)
-			end
-			task.wait(0.5)
-		end
-    end)
+	local KillAuraV3Ability = (type(Cfg.KillAuraV3Ability) == "table" and Cfg.KillAuraV3Ability[1]) or Cfg.KillAuraV3Ability
+	if Cfg.KillAuraV3 and KillAuraV3Ability == "WallCombo" then
+		task.spawn(function()
+			pcall(function() self:GetPlayerCFrame()  end)
+				for i=1,14 do
+					pcall(function() self:WallCombo(i)  end)
+					pcall(function() self:GetPlayerCFrame()  end)
+				end
+		end)
+	elseif Cfg.KillAuraV3 and KillAuraV3Ability == "Ability4" then
+		task.spawn(function()
+			pcall(function() self:GetPlayerCFrame()  end)
+				for i=1,14 do
+					pcall(function() self:UseAbility4(i)  end)
+					pcall(function() self:GetPlayerCFrame()  end)
+				end
+		end)
+	end
 end
 
 
 function AbilitySpam5:Stop()
     self.enabled = false
 end
-	
-		KillAuraSection:AddToggle({ Name = "[BETA]kill aura V3(best with gon)", Flag = "KillAuraV3", Default = Cfg.KillAuraV3, Callback = function(v)
-			Cfg.KillAuraV3 = v
-			if v then
-				AbilitySpam5:Start()
-			else
-				AbilitySpam5:Stop()
+local KillAuraV3Spamming = false
+		function updateKillAuraV3Spam()
+			local KillAuraV3Mode = (type(Cfg.KillAuraV3Mode) == "table" and Cfg.KillAuraV3Mode[1]) or Cfg.KillAuraV3Mode
+			if Cfg.KillAuraV3 and KillAuraV3Mode == "Spam" then
+				KillAuraV3Spamming = true
+					task.spawn(function()
+						while KillAuraV3Spamming do
+							AbilitySpam5:Start()
+							task.wait(Cfg.KillAuraV3Delay)
+						end
+					end)
 			end
-		end})
+		end
+UserInputService.InputBegan:Connect(function(input, gp) 
+			local KillAuraV3Keybind = (type(Cfg.KillAuraV3Keybind) == "table" and Cfg.KillAuraV3Keybind[1]) or Cfg.KillAuraV3Keybind
+			local KillAuraV3Mode = (type(Cfg.KillAuraV3Mode) == "table" and Cfg.KillAuraV3Mode[1]) or Cfg.KillAuraV3Mode
+			if not gp and KillAuraV3Keybind and KillAuraV3Keybind ~= "NIL" and input.KeyCode.Name == KillAuraV3Keybind and Cfg.KillAuraV3 then
+				if KillAuraV3Mode == "Spam" then
+					KillAuraV3Spamming = not KillAuraV3Spamming
+					if KillAuraV3Spamming then
+						updateKillAuraV3Spam()
+					end
+				elseif KillAuraV3Mode == "Manual" then
+					AbilitySpam5:Start()
+				end
+			end
+		end)
+	
+		KillAuraSection:AddToggle({ Name = "Enable", Flag = "KillAuraV3", Default = Cfg.KillAuraV3, Callback = function(v) Cfg.KillAuraV3 = v end})
+		KillAuraSection:AddDropdown({ Name = "Mode", Default = "Manual", Multi = false, Flag = "KillAuraV3Mode", Values = {"Manual", "Spam"}, Callback = function(v) Cfg.KillAuraV3Mode = v; updateWallComboSpam() end })
+		KillAuraSection:AddDropdown({ Name = "Ability", Default = "WallCombo", Multi = false, Flag = "KillAuraV3Ability", Values = {"WallCombo", "Ability4"}, Callback = function(v) Cfg.KillAuraV3Ability = v end })
+		KillAuraSection:AddToggle({ Name = "Ignore Friends", Flag = "KillAuraV3IgnoreFriends", Default = Cfg.KillAuraV3IgnoreFriends, Callback = function(v) Cfg.KillAuraV3IgnoreFriends = v end })
+		KillAuraSection:AddDropdown({ Name = "Kill Aura V3 Keybind", Default = "NIL", Multi = false, Flag = "KillAuraV3Keybind", Values = {"NIL","E","Q","R","T","Y"}, Callback = function(v) Cfg.KillAuraV3Keybind = v end})
+		KillAuraSection:AddSlider({ Name = "Spam Delay", Min = 0.1, Max = 5.0, Default = 2.5, Round = 1, Flag = "KillAuraV3Delay", Callback = function(v) Cfg.KillAuraV3Delay = v end })
 		KillAuraSection:AddParagraph({
 			Title = "Kill aura V3",
-			Content = "This Kill aura has inf range\n bro idk it has some kind of desync problem i tried to fix it many times\n it will stay with the desync problem i will add more options after exams"
+			Content = "This Kill aura has inf range\n dont use low spam delay ability4\n it crashes server"
 		})
-	local AbilitySpam3 = {
+	--[[local AbilitySpam3 = {
     enabled = false,
     connection = nil
 }
@@ -12419,8 +12559,9 @@ function AbilitySpam3:GetPlayerCFrame()
 end
 function AbilitySpam3:fullcustom2()
     local targetCF = playercframe
+	local servertime = workspace:GetServerTimeNow()
 	local args = {
-    tick(),
+    servertime,
     targetCF,
     false,
 	nil,
@@ -12430,8 +12571,9 @@ function AbilitySpam3:fullcustom2()
 end
 function AbilitySpam3:fullcustom(number7)
     local targetCF = self:GetNearestPlayerCFrame(number7)
+	local servertime = workspace:GetServerTimeNow()
 	local args = {
-    tick(),
+    servertime,
     targetCF,
     false,
 	nil,
@@ -12441,67 +12583,87 @@ function AbilitySpam3:fullcustom(number7)
 end
 
 function AbilitySpam3:UseAbility4(number8)
-    local charName = self:GetCurrentCharacter()
-    if not self:HasAbility4(charName) then return end
+		local charName = self:GetCurrentCharacter()
+		if not self:HasAbility4(charName) then return end
 
-    local target = self:FindNearestPlayer(number8)
-    if not target then return end
+		local target = self:FindNearestPlayer(number8)
+		if not target then return end
 
-    local targetChar = target.Character
-    local targetCF = self:GetNearestPlayerCFrame(number8)
-		pcall(function()
-			local ability = ReplicatedStorage.Characters[charName].Abilities["4"]
-			ReplicatedStorage.Remotes.Abilities.Ability:FireServer(ability,9000000)
+		local targetChar = target.Character
+		local targetCF = self:GetNearestPlayerCFrame(number8)
+		for j=1,20 do
+			pcall(function() self:fullcustom(number8) end)
+			task.wait()
+			pcall(function()
+				local ability = ReplicatedStorage.Characters[charName].Abilities["4"]
+				ReplicatedStorage.Remotes.Abilities.Ability:FireServer(ability,9000000)
+				local servertime = workspace:GetServerTimeNow()
 
-			local actions = {377,380,383,384,385,387,389}
-		for i=1,7 do
-			local args = {
-				ability,
-				charName..":Abilities:4",
-				i,
-				9000000,
-				{
-					HitboxCFrames = {targetCF,targetCF},
-					BestHitCharacter = targetChar,
-					HitCharacters = {targetChar},
-					Ignore = i>2 and {ActionNumber1={targetChar}} or {},
-					DeathInfo = {},
-					BlockedCharacters = {},
-					HitInfo = {
-						IsFacing = not (i==1 or i==2),
-						IsInFront = i<=2,
-						Blocked = i>2 and false or nil
+				local actions = {377,380,383,384,385,387,389}
+			for i=1,7 do
+				local args = {
+					ability,
+					charName..":Abilities:4",
+					i,
+					9000000,
+					{
+						HitboxCFrames = {targetCF,targetCF},
+						BestHitCharacter = targetChar,
+						HitCharacters = {targetChar},
+						Ignore = i>2 and {ActionNumber1={targetChar}} or {},
+						DeathInfo = {},
+						BlockedCharacters = {},
+						HitInfo = {
+							IsFacing = not (i==1 or i==2),
+							IsInFront = i<=2,
+							Blocked = i>2 and false or nil
+						},
+						ServerTime = servertime,
+						Actions = i>2 and {ActionNumber1={}} or {},
+						FromCFrame = targetCF
 					},
-					ServerTime = tick(),
-					Actions = i>2 and {ActionNumber1={}} or {},
-					FromCFrame = targetCF
-				},
-				"Action"..actions[i],
-				i==2 and 0.1 or nil
-			}
+					"Action"..actions[i],
+					i==2 and 0.1 or nil
+				}
 
-			if i==7 then
-				args[5].RockCFrame = targetCF
-				args[5].Actions = {
-					ActionNumber1 = {
-						[target.Name] = {
-							StartCFrameStr = tostring(targetCF.X)..","..tostring(targetCF.Y)..","..tostring(targetCF.Z)..",0,0,0,0,0,0,0,0,0",
-							ImpulseVelocity = Vector3.new(1901,-25000,291),
-							AbilityName = "4",
-							RotVelocityStr = "0,0,0",
-							VelocityStr = "1.900635,0.010867,0.291061",
-							Duration = 2,
-							RotImpulseVelocity = Vector3.new(5868,-6649,-7414),
-							Seed = math.random(1,1e6),
-							LookVectorStr = "0.988493,0,0.151268"
+				if i==7 then
+					args[5].RockCFrame = targetCF
+					args[5].Actions = {
+						ActionNumber1 = {
+							[target.Name] = {
+								StartCFrameStr = tostring(targetCF.X)..","..tostring(targetCF.Y)..","..tostring(targetCF.Z)..",0,0,0,0,0,0,0,0,0",
+								ImpulseVelocity = Vector3.new(1901,-25000,291),
+								AbilityName = "4",
+								RotVelocityStr = "0,0,0",
+								VelocityStr = "1.900635,0.010867,0.291061",
+								Duration = 2,
+								RotImpulseVelocity = Vector3.new(5868,-6649,-7414),
+								Seed = math.random(1,1e6),
+								LookVectorStr = "0.988493,0,0.151268"
+							}
 						}
 					}
-				}
-			end
+				end
 
-			ReplicatedStorage.Remotes.Combat.Action:FireServer(unpack(args))
-			end
-		end)
+				ReplicatedStorage.Remotes.Combat.Action:FireServer(unpack(args))
+				end
+				local targetCF2 = playercframe2
+					local args2 = {
+					servertime,
+					targetCF2,
+					false,
+					nil,
+					[5] = game:GetService("Players").LocalPlayer.Character
+					}
+					ReplicatedStorage.Remotes.Replication.FullCustomReplicationUnreliable:FireServer(unpack(args2, 1, 5))
+			end)
+			pcall(function()
+				local c = self:GetCurrentCharacter()
+				ReplicatedStorage.Remotes.Abilities.AbilityCanceled:FireServer(
+					ReplicatedStorage.Characters[c].Abilities["4"]
+				)
+			end)
+		end
 	end
 function AbilitySpam3:tp()
 	task.spawn(function()
@@ -12520,20 +12682,11 @@ function AbilitySpam3:Start()
     if self.enabled then return end
     self.enabled = true
 	task.spawn(function()
+		pcall(function() self:GetPlayerCFrame()  end)
 		while self.enabled do
 				for i=1,14 do
-					for j=1,20 do
-						pcall(function() self:fullcustom(i) end)
-						task.wait()
-						pcall(function() self:UseAbility4(i) end)
-						task.wait()
-						pcall(function()
-							local c = self:GetCurrentCharacter()
-							ReplicatedStorage.Remotes.Abilities.AbilityCanceled:FireServer(
-								ReplicatedStorage.Characters[c].Abilities["4"]
-							)
-						end)
-					end
+					pcall(function() self:UseAbility4(i) end)
+					pcall(function() self:GetPlayerCFrame()  end)
 					task.wait(0.1)
 				end
 				task.wait(4.5)
@@ -12557,7 +12710,7 @@ end
 		KillAuraSection:AddParagraph({
 			Title = "Kill aura V4",
 			Content = "same as kill aura v3 but uses ability isntead of wallcombo"
-		})
+		})]]
 	
 
 	-- Server Lagger Child Tab
@@ -12657,7 +12810,7 @@ end
 		end
 		
 		local function getServerTimeMethod2()
-			return tick()
+			return workspace:GetServerTimeNow()
 		end
 		
 		local function wallcomboMethod2()
@@ -12832,6 +12985,7 @@ function AbilitySpam2:UseAbility4()
     pcall(function()
         local ability = ReplicatedStorage.Characters[charName].Ultimates["4"]
         ReplicatedStorage.Remotes.Abilities.Ability:FireServer(ability,9000000)
+		local servertime = workspace:GetServerTimeNow()
 
         local actions = {377,380,383,384,385,387,389}
         for i=1,7 do
@@ -12852,7 +13006,7 @@ function AbilitySpam2:UseAbility4()
                         IsInFront = i<=2,
                         Blocked = i>2 and false or nil
                     },
-                    ServerTime = tick(),
+                    ServerTime = servertime,
                     Actions = i>2 and {ActionNumber1={}} or {},
                     FromCFrame = targetCF
                 },
@@ -12994,6 +13148,7 @@ function AbilitySpam4:UseAbility4()
     pcall(function()
         local ability = ReplicatedStorage.Characters[charName].Abilities["4"]
         ReplicatedStorage.Remotes.Abilities.Ability:FireServer(ability,9000000)
+		local servertime = workspace:GetServerTimeNow()
 
         local actions = {377,380,383,384,385,387,389}
         for i=1,7 do
@@ -13014,7 +13169,7 @@ function AbilitySpam4:UseAbility4()
                         IsInFront = i<=2,
                         Blocked = i>2 and false or nil
                     },
-                    ServerTime = tick(),
+                    ServerTime = servertime,
                     Actions = i>2 and {ActionNumber1={}} or {},
                     FromCFrame = targetCF
                 },
@@ -13052,7 +13207,7 @@ function AbilitySpam4:Start()
     self.connection = RunService.Heartbeat:Connect(function()
         if not self.enabled then return end
         self:UseAbility4()
-        task.wait(1)
+        task.wait(0.5)
         if self.enabled then
             pcall(function()
                 local c = self:GetCurrentCharacter()
