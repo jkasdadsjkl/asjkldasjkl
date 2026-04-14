@@ -12486,11 +12486,11 @@ UserInputService.InputBegan:Connect(function(input, gp)
 		end)
 	
 		KillAuraSection:AddToggle({ Name = "Enable", Flag = "KillAuraV3", Default = Cfg.KillAuraV3, Callback = function(v) Cfg.KillAuraV3 = v end})
-		KillAuraSection:AddDropdown({ Name = "Mode", Default = "Manual", Multi = false, Flag = "KillAuraV3Mode", Values = {"Manual", "Spam"}, Callback = function(v) Cfg.KillAuraV3Mode = v; updateWallComboSpam() end })
-		KillAuraSection:AddDropdown({ Name = "Ability", Default = "WallCombo", Multi = false, Flag = "KillAuraV3Ability", Values = {"WallCombo", "Ability4"}, Callback = function(v) Cfg.KillAuraV3Ability = v end })
+		KillAuraSection:AddDropdown({ Name = "Mode", Default =  Cfg.KillAuraV3Mode, Multi = false, Flag = "KillAuraV3Mode", Values = {"Manual", "Spam"}, Callback = function(v) Cfg.KillAuraV3Mode = v; updateWallComboSpam() end })
+		KillAuraSection:AddDropdown({ Name = "Ability", Default =  Cfg.KillAuraV3Ability, Multi = false, Flag = "KillAuraV3Ability", Values = {"WallCombo", "Ability4"}, Callback = function(v) Cfg.KillAuraV3Ability = v end })
 		KillAuraSection:AddToggle({ Name = "Ignore Friends", Flag = "KillAuraV3IgnoreFriends", Default = Cfg.KillAuraV3IgnoreFriends, Callback = function(v) Cfg.KillAuraV3IgnoreFriends = v end })
-		KillAuraSection:AddDropdown({ Name = "Kill Aura V3 Keybind", Default = "NIL", Multi = false, Flag = "KillAuraV3Keybind", Values = {"NIL","E","Q","R","T","Y"}, Callback = function(v) Cfg.KillAuraV3Keybind = v end})
-		KillAuraSection:AddSlider({ Name = "Spam Delay", Min = 0.1, Max = 5.0, Default = 2.5, Round = 1, Flag = "KillAuraV3Delay", Callback = function(v) Cfg.KillAuraV3Delay = v end })
+		KillAuraSection:AddDropdown({ Name = "Kill Aura V3 Keybind", Default = Cfg.KillAuraV3Keybind, Multi = false, Flag = "KillAuraV3Keybind", Values = {"NIL","E","Q","R","T","Y"}, Callback = function(v) Cfg.KillAuraV3Keybind = v end})
+		KillAuraSection:AddSlider({ Name = "Spam Delay", Min = 0.1, Max = 5.0, Default = Cfg.KillAuraV3Delay, Round = 1, Flag = "KillAuraV3Delay", Callback = function(v) Cfg.KillAuraV3Delay = v end })
 		KillAuraSection:AddParagraph({
 			Title = "Kill aura V3",
 			Content = "This Kill aura has inf range\n dont use low spam delay ability4\n it crashes server"
