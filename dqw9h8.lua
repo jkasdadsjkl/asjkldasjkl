@@ -9754,7 +9754,6 @@ end;
 return Compkiller;
 ]=]
 
-local EncodingService = game:GetService("EncodingService")
 local UserInputService = game:GetService("UserInputService")
 local RunService = game:GetService("RunService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -12099,8 +12098,8 @@ end
 	end
 local KillAuraTab = DualTab4:DrawTab({ Name = "Kill Aura", Type = "Double", EnableScrolling = true })
 local KillAuraSection = KillAuraTab:DrawSection({ Name = "Kill Aura V3", Position = 'left', EnableScrolling = true })
-local GiveMeNameIdeaSection = KillAuraTab:DrawSection({ Name = "GiveMeNameIdea", Position = 'right', EnableScrolling = true })
-GiveMeNameIdeaSection:AddParagraph({
+local TrollSection = KillAuraTab:DrawSection({ Name = "Troll Stuff", Position = 'right', EnableScrolling = true })
+TrollSection:AddParagraph({
 			Title = "COMING SOON",
 			Content = "Will Be added next update"
 		})
@@ -12138,15 +12137,24 @@ function AbilitySpam5:FindNearestPlayer(targetnumber)
 
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= LocalPlayer and p.Character then
+            local tr = p.Character:FindFirstChild("HumanoidRootPart")
             local th = p.Character:FindFirstChild("Humanoid")
 			if LocalPlayer:IsFriendsWith(p.UserId) and Cfg.KillAuraV3IgnoreFriends then
             	continue
             end
-            if th then
-				table.insert(playersName, p)
-			end
-		end
+            if tr and th then
+                local hp = th:GetAttribute("Health")
+                if hp then
+                    table.insert(playersName, p)
+                end
+            end
+        end
     end
+
+    -- sort by username alphabetically
+    table.sort(playersName, function(a, b)
+        return a.Name < b.Name
+    end)
 
 	local target10 = playersName[targetnumber] or nil
 	return target10
@@ -12233,6 +12241,8 @@ function AbilitySpam5:WallCombo(number3)
 							}
 						}
 					end
+
+					ReplicatedStorage.Remotes.Combat.Action:FireServer(unpack(args))
 				end
 			end)
 			pcall(function()
@@ -12293,8 +12303,8 @@ function AbilitySpam5:WallCombo(number3)
 					end
 
 					ReplicatedStorage.Remotes.Combat.Action:FireServer(unpack(args))
-					ReplicatedStorage.Remotes.Combat.Action:FireServer(unpack(args))
-					local targetCF2 = playercframe2
+				end
+				local targetCF2 = playercframe2
 					local args2 = {
 					servertime,
 					targetCF2,
@@ -12303,92 +12313,9 @@ function AbilitySpam5:WallCombo(number3)
 					[5] = game:GetService("Players").LocalPlayer.Character
 					}
 					ReplicatedStorage.Remotes.Replication.FullCustomReplicationUnreliable:FireServer(unpack(args2, 1, 5))
-				end
 			end)
 		end
 	end
-end
-function AbilitySpam5:NoSpawn(number3)
-    local charName = self:GetCurrentCharacter()
-    if not self:HasAbility4(charName) then return end
-
-    local target = self:FindNearestPlayer(number3)
-    if not target then return end
-
-    local targetChar = target.Character
-		pcall(function() self:fullcustom(number3)  end)
-			task.wait()
-		pcall(function()
-				local targetCF = self:GetNearestPlayerCFrame(number3)
-				local ability = ReplicatedStorage.Characters[charName].WallCombo
-				local abilityRemote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Abilities"):WaitForChild("Ability")
-				local head = targetChar:FindFirstChild("Head")
-				local servertime = workspace:GetServerTimeNow()
-				for i=1,2 do
-					local abilityArgs = {
-					ability,
-					9000000,
-					[4] = targetChar,
-					[5] = head.Position + Vector3.new(0,0,2.5)
-					}
-					abilityRemote:FireServer(unpack(abilityArgs, 1, 5))
-					local args = {
-						ability,
-						"Characters:"..charName..":WallCombo",
-						4,
-						9000000,
-						{
-							HitboxCFrames = i>1 and {targetCF,targetCF} or {},
-							BestHitCharacter = nil,
-							HitCharacters = {targetChar},
-							Ignore = {},
-							DeathInfo = {},
-							BlockedCharacters = {},
-							HitInfo = {
-								IsFacing = true,
-								IsInFront = true,
-								Blocked = false
-							},
-							ServerTime = servertime,
-							Actions = i>1 and {ActionNumber1={}} or {},
-							FromCFrame = targetCF
-						},
-						"Action".. math.random(1000, 9999),
-						i==2 and 0.1 or nil
-					}
-
-					if 4==4 then
-						args[5].RockCFrame = targetCF
-						args[5].Actions = {
-							ActionNumber1 = {
-								[target.Name] = {
-									StartCFrameStr = tostring(targetCF.X)..","..tostring(targetCF.Y)..","..tostring(targetCF.Z)..",0,0,0,0,0,0,0,0,0",
-									ImpulseVelocity = Vector3.new(1901,-25000,291),
-									AbilityName = "WallCombo",
-									RotVelocityStr = "0,0,0",
-									VelocityStr = "1.900635,0.010867,0.291061",
-									Duration = 2,
-									RotImpulseVelocity = Vector3.new(5868,-6649,-7414),
-									Seed = math.random(1,1e6),
-									LookVectorStr = "0.988493,0,0.151268"
-								}
-							}
-						}
-					end
-
-					ReplicatedStorage.Remotes.Combat.Action:FireServer(unpack(args))
-					ReplicatedStorage.Remotes.Combat.Action:FireServer(unpack(args))
-					local targetCF2 = playercframe2
-					local args2 = {
-					servertime,
-					targetCF2,
-					false,
-					nil,
-					[5] = game:GetService("Players").LocalPlayer.Character
-					}
-					ReplicatedStorage.Remotes.Replication.FullCustomReplicationUnreliable:FireServer(unpack(args2, 1, 5))
-				end
-			end)
 end
 function AbilitySpam5:UseAbility4(number8)
 		local charName = self:GetCurrentCharacter()
@@ -12511,9 +12438,7 @@ function AbilitySpam5:Start()
 		task.spawn(function()
 			pcall(function() self:GetPlayerCFrame()  end)
 				for i=1,14 do
-					task.wait(0.01)
 					pcall(function() self:WallCombo(i)  end)
-					task.wait()
 					pcall(function() self:GetPlayerCFrame()  end)
 				end
 		end)
@@ -12521,13 +12446,16 @@ function AbilitySpam5:Start()
 		task.spawn(function()
 			pcall(function() self:GetPlayerCFrame()  end)
 				for i=1,14 do
-					task.wait(0.01)
 					pcall(function() self:UseAbility4(i)  end)
-					task.wait(0.01)
 					pcall(function() self:GetPlayerCFrame()  end)
 				end
 		end)
 	end
+end
+
+
+function AbilitySpam5:Stop()
+    self.enabled = false
 end
 local KillAuraV3Spamming = false
 		function updateKillAuraV3Spam()
@@ -12553,63 +12481,20 @@ UserInputService.InputBegan:Connect(function(input, gp)
 					end
 				elseif KillAuraV3Mode == "Manual" then
 					AbilitySpam5:Start()
-					task.wait()
 				end
 			end
 		end)
-	local function killauraV3click()
-		local KillAuraV3Mode = (type(Cfg.KillAuraV3Mode) == "table" and Cfg.KillAuraV3Mode[1]) or Cfg.KillAuraV3Mode
-				if Cfg.KillAuraV3 then
-					if KillAuraV3Mode == "Spam" then
-						KillAuraV3Spamming = not KillAuraV3Spamming
-						if KillAuraV3Spamming then
-							updateKillAuraV3Spam()
-						end
-					elseif KillAuraV3Mode == "Manual" then
-						AbilitySpam5:Start()
-						task.wait()
-					end
-				end
-			end
+	
 		KillAuraSection:AddToggle({ Name = "Enable", Flag = "KillAuraV3", Default = Cfg.KillAuraV3, Callback = function(v) Cfg.KillAuraV3 = v end})
-		KillAuraSection:AddDropdown({ Name = "Mode", Default =  Cfg.KillAuraV3Mode, Multi = false, Flag = "KillAuraV3Mode", Values = {"Manual", "Spam"}, Callback = function(v) Cfg.KillAuraV3Mode = v; updateKillAuraV3Spam() end })
+		KillAuraSection:AddDropdown({ Name = "Mode", Default =  Cfg.KillAuraV3Mode, Multi = false, Flag = "KillAuraV3Mode", Values = {"Manual", "Spam"}, Callback = function(v) Cfg.KillAuraV3Mode = v; updateWallComboSpam() end })
 		KillAuraSection:AddDropdown({ Name = "Ability", Default =  Cfg.KillAuraV3Ability, Multi = false, Flag = "KillAuraV3Ability", Values = {"WallCombo", "Ability4"}, Callback = function(v) Cfg.KillAuraV3Ability = v end })
 		KillAuraSection:AddToggle({ Name = "Ignore Friends", Flag = "KillAuraV3IgnoreFriends", Default = Cfg.KillAuraV3IgnoreFriends, Callback = function(v) Cfg.KillAuraV3IgnoreFriends = v end })
 		KillAuraSection:AddDropdown({ Name = "Kill Aura V3 Keybind", Default = Cfg.KillAuraV3Keybind, Multi = false, Flag = "KillAuraV3Keybind", Values = {"NIL","E","Q","R","T","Y"}, Callback = function(v) Cfg.KillAuraV3Keybind = v end})
-		KillAuraSection:AddButton({Name = "keybind", Callback = function() killauraV3click() end})
 		KillAuraSection:AddSlider({ Name = "Spam Delay", Min = 0.1, Max = 5.0, Default = Cfg.KillAuraV3Delay, Round = 1, Flag = "KillAuraV3Delay", Callback = function(v) Cfg.KillAuraV3Delay = v end })
 		KillAuraSection:AddParagraph({
 			Title = "Kill aura V3",
 			Content = "This Kill aura has inf range\n dont use low spam delay ability4\n it crashes server"
 		})
-function AbilitySpam5:NoSpawnStart()
-	self.enabled = true
-		task.spawn(function()
-			while self.enabled do
-			pcall(function() self:GetPlayerCFrame()  end)
-				for i=1,14 do
-					task.wait()
-					pcall(function() self:NoSpawn(i)  end)
-					task.wait()
-					pcall(function() self:GetPlayerCFrame()  end)
-				end
-				task.wait(0.5)
-			end
-		end)
-end
-
-
-function AbilitySpam5:NoSpawnStop()
-    self.enabled = false
-end
-		--[[KillAuraSection:AddToggle({ Name = "NoSpawn all", Flag = "KillAuraV3NoSpawn", Default = Cfg.KillAuraV3NoSpawn or false, Callback = function(v)
-			Cfg.KillAuraV3NoSpawn = v
-			if v then
-				pcall(function() AbilitySpam5:NoSpawnStart()  end)
-			else
-				pcall(function() AbilitySpam5:NoSpawnStop()  end)
-			end
-		end})]]
 	--[[local AbilitySpam3 = {
     enabled = false,
     connection = nil
@@ -13605,60 +13490,56 @@ end
 				end
 			end
 		})
-local savedInstances = {}
+local savedMobWallCombo = nil
+local savedGonWallCombo = nil
+local savedGonWallComboSound = nil
+local savedMobWallComboSound = nil
 
-local function removeInstances(...)
-    for _, instance in ipairs({...}) do
-        table.insert(savedInstances, {
-            clone = instance:Clone(),
-            parent = instance.Parent
-        })
-        instance:Destroy()
-    end
-end
+local function startAntiServerLagger()
+    local mobWallCombo = game:GetService("ReplicatedStorage").Characters.Mob.WallCombo:FindFirstChild("MobWallCombo")
+    local gonWallCombo = game:GetService("ReplicatedStorage").Characters.Gon.WallCombo:FindFirstChild("GonWallCombo")
+    local gonWallComboSound = game:GetService("SoundService").All.Sounds:FindFirstChild("GonWallCombo")
+    local mobWallComboSound = game:GetService("SoundService").All.Sounds:FindFirstChild("MobWallCombo")
 
-local function restoreInstances()
-    for _, saved in ipairs(savedInstances) do
-        saved.clone.Parent = saved.parent
-    end
-    savedInstances = {}
-end
---game:GetService("ReplicatedStorage").Characters.Gon.WallCombo:FindFirstChild("GonWallCombo")
-    --game:GetService("SoundService").All.Sounds:FindFirstChild("GonWallCombo")
-local function startGonAntiServerLagger()
-	removeInstances(
-		game:GetService("ReplicatedStorage").Characters.Mob.Abilities["4"].MobCounter,
-		game:GetService("ReplicatedStorage").Characters.Mob.Abilities["4"].MobCounterAttack,
-		game:GetService("ReplicatedStorage").Characters.Mob.Abilities["4"].MobCounterBubble,
-		game:GetService("ReplicatedStorage").Characters.Nanami.WallCombo.NanamiWallCombo,
-		game:GetService("ReplicatedStorage").Characters.Nanami.Abilities["4"].Suppression,
-		game:GetService("ReplicatedStorage").Characters.Stark.Abilities["4"].StarkBrilliant,
-		game:GetService("ReplicatedStorage").Characters.Stark.WallCombo.StarkWallCombo,
-		game:GetService("ReplicatedStorage").Characters.Sukuna.WallCombo.SukunaTransformWallCombo,
-		game:GetService("ReplicatedStorage").Characters.Sukuna.WallCombo.SukunaWallCombo,
-		game:GetService("ReplicatedStorage").Characters.Sukuna.Ultimates["4"].MalevolentShrine,
-		game:GetService("ReplicatedStorage").Characters.Sukuna.Abilities["4"].SukunaSpiderweb,
-		game:GetService("ReplicatedStorage").Characters.Mob.WallCombo:FindFirstChild("MobWallCombo"))
+    if mobWallCombo then savedMobWallCombo = mobWallCombo:Clone() mobWallCombo:Destroy() end
+    if gonWallCombo then savedGonWallCombo = gonWallCombo:Clone() gonWallCombo:Destroy() end
+    if gonWallComboSound then savedGonWallComboSound = gonWallComboSound:Clone() gonWallComboSound:Destroy() end
+    if mobWallComboSound then savedMobWallComboSound = mobWallComboSound:Clone() mobWallComboSound:Destroy() end
 
-    
     showNotification("Server Lagger", "Anti Server Lagger: ON")
 end
 
-local function stopGonAntiServerLagger()
-	restoreInstances()
+local function stopAntiServerLagger()
+    if savedMobWallCombo then
+        savedMobWallCombo.Parent = game:GetService("ReplicatedStorage").Characters.Mob.WallCombo
+        savedMobWallCombo = nil
+    end
+    if savedGonWallCombo then
+        savedGonWallCombo.Parent = game:GetService("ReplicatedStorage").Characters.Gon.WallCombo
+        savedGonWallCombo = nil
+    end
+    if savedGonWallComboSound then
+        savedGonWallComboSound.Parent = game:GetService("SoundService").All.Sounds
+        savedGonWallComboSound = nil
+    end
+    if savedMobWallComboSound then
+        savedMobWallComboSound.Parent = game:GetService("SoundService").All.Sounds
+        savedMobWallComboSound = nil
+    end
+
     showNotification("Server Lagger", "Anti Server Lagger: OFF")
 end
 		
 		ServerLaggerSection:AddToggle({
-			Name = "antiserverlagger for gon (breaks wallcombo and ability4 and ult4 for everyone but gon)",
-			Flag = "AntiServerLaggerGon",
-			Default = Cfg.AntiServerLaggerGon or false,
+			Name = "Anti Server Lagger wallcombo1(breaks gon and mob wallcombo)",
+			Flag = "AntiServerLagger",
+			Default = Cfg.AntiServerLagger or false,
 			Callback = function(v)
-				Cfg.AntiServerLaggerGon = v
+				Cfg.AntiServerLagger = v
 				if v then
-					startGonAntiServerLagger()
+					startAntiServerLagger()
 				else
-					stopGonAntiServerLagger()
+					stopAntiServerLagger()
 				end
 			end
 		})
@@ -13670,6 +13551,13 @@ end
 		local savedMobClairvoyanceNoCounterSound = nil
 
 		local function startAnti2ServerLagger()
+			local MobCounter = game:GetService("ReplicatedStorage").Characters.Mob.Abilities["4"].MobCounter
+			local MobCounterAttack = game:GetService("ReplicatedStorage").Characters.Mob.Abilities["4"].MobCounterAttack
+			local MobCounterBubble = game:GetService("ReplicatedStorage").Characters.Mob.Abilities["4"].MobCounterBubble
+			local MobClairvoyanceSound = game:GetService("SoundService").All.Sounds.MobClairvoyance
+			local MobClairvoyanceCounterSound = game:GetService("SoundService").All.Sounds.MobClairvoyanceCounter
+			local MobClairvoyanceNoCounterSound = game:GetService("SoundService").All.Sounds.MobClairvoyanceNoCounter
+
 			if MobCounter then savedMobCounter = MobCounter:Clone() MobCounter:Destroy() end
 			if MobCounterAttack then savedMobCounterAttack = MobCounterAttack:Clone() MobCounterAttack:Destroy() end
 			if MobCounterBubble then savedMobCounterBubble = MobCounterBubble:Clone() MobCounterBubble:Destroy() end
@@ -14251,31 +14139,7 @@ do
 				inputConn = UserInputService.InputBegan:Connect(function(input, gp)
 					local spammerKeybind = Cfg.InstantKillKeybind
 					local spammerMode = (type(Cfg.InstantKillMode) == "table" and Cfg.InstantKillMode[1]) or Cfg.InstantKillMode
-					if not gp and input.KeyCode and spammerKeybind and spammerKeybind ~= "NIL" and input.KeyCode.Name == spammerKeybind and Cfg.InstantKill then
-						if spammerMode == "Spam" then
-							spamming = not spamming
-							if spamming then
-								task.spawn(function() 
-									while spamming and dashActive do 
-										local currentChar = LocalPlayer.Data.Character.Value
-										local killCount = (currentChar == "Gon") and 100 or 200
-										KillAura(killCount)
-										task.wait(0.1)
-									end 
-								end)
-							end
-						else
-							local currentChar = LocalPlayer.Data.Character.Value
-							local killCount = (currentChar == "Gon") and 100 or 200
-							KillAura(killCount)
-						end
-					end
-				end)
-			end
-		end})
-		local function instantkillclick()
-					local spammerMode = (type(Cfg.InstantKillMode) == "table" and Cfg.InstantKillMode[1]) or Cfg.InstantKillMode
-					if Cfg.InstantKill then
+					if not gp and input.KeyCode and spammerKeybind and spammerKeybind ~= "NIL" and input.KeyCode.Name == spammerKeybind then
 						if spammerMode == "Spam" then
 							spamming = not spamming
 							if spamming then
@@ -14294,9 +14158,10 @@ do
 							KillAura(killCount)
 						end
 					end
-				end
+				end)
+			end
+		end})
 		Section2:AddDropdown({ Name = "Keybind", Flag = "InstantKillKeybind", Default = Cfg.InstantKillKeybind, Multi = false, Values = {"NIL","E","Q","R","T","Y","F","G"}, Callback = function(v) Cfg.InstantKillKeybind = v end})
-		Section2:AddButton({Name = "keybind", Callback = function() instantkillclick() end,})
 		Section2:AddDropdown({ Name = "Mode", Flag = "InstantKillMode", Default = Cfg.InstantKillMode, Multi = false, Values = {"Manual", "Spam"}, Callback = function(v) Cfg.InstantKillMode = v end})
 		Section2:AddDropdown({ Name = "Target Selection", Flag = "InstantKillTargetSelection", Default = Cfg.InstantKillTargetSelection, Multi = false, Values = {"Closest", "Lowest", "All-in-range"}, Callback = function(v) Cfg.InstantKillTargetSelection = v end})
 		Section2:AddToggle({ Name = "Ignore Friends", Flag = "InstantKillIgnoreFriends", Default = Cfg.InstantKillIgnoreFriends, Callback = function(v) Cfg.InstantKillIgnoreFriends = v end})
@@ -14559,23 +14424,11 @@ do
 				end
 			end
 		end)
-		local function wallcomboclick()
-			local wallComboMode = (type(Cfg.WallComboMode) == "table" and Cfg.WallComboMode[1]) or Cfg.WallComboMode
-				if wallComboMode == "Spam" then
-					wallComboSpamming = not wallComboSpamming
-					if wallComboSpamming and (not wallComboConnection or not wallComboConnection.Connected) then
-						updateWallComboSpam()
-					end
-				elseif wallComboMode == "Manual" then
-					wallcomboveryud()
-				end
-		end
 		SpecialSection1:AddToggle({ Name = "Wall Combo", Flag = "WallCombo", Default = Cfg.WallCombo, Callback = function(v) Cfg.WallCombo = v; updateWallComboSpam() end })
 		SpecialSection1:AddDropdown({ Name = "Mode", Default = Cfg.WallComboMode, Multi = false, Flag = "WallComboMode", Values = {"Manual", "Spam"}, Callback = function(v) Cfg.WallComboMode = v; updateWallComboSpam() end })
 		SpecialSection1:AddDropdown({ Name = "Target Selection", Default = Cfg.WallComboTargetSelection, Multi = false, Flag = "WallComboTargetSelection", Values = {"Closest", "Lowest"}, Callback = function(v) Cfg.WallComboTargetSelection = v end })
 		SpecialSection1:AddToggle({ Name = "Ignore Friends", Flag = "WallComboIgnoreFriends", Default = Cfg.WallComboIgnoreFriends, Callback = function(v) Cfg.WallComboIgnoreFriends = v end })
 		SpecialSection1:AddDropdown({ Name = "Wall Combo Keybind", Default = Cfg.WallComboKeybind, Multi = false, Flag = "WallComboKeybind", Values = {"NIL","E","Q","R","T","Y"}, Callback = function(v) Cfg.WallComboKeybind = v end})
-		SpecialSection1:AddButton({Name = "keybind", Callback = function()  wallcomboclick() end,})
 		SpecialSection1:AddSlider({ Name = "Spam Delay", Min = 0.1, Max = 5.0, Default = Cfg.WallComboDelay, Round = 1, Flag = "WallComboDelay", Callback = function(v) Cfg.WallComboDelay = v end })
 	end
 	
