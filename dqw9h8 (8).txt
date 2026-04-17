@@ -14774,7 +14774,14 @@ do
 						updateWallComboSpam()
 					end
 				elseif wallComboMode == "Manual" then
+					pcall(function() AbilitySpam5:GetPlayerCFrame()() end)
+					for i=1,2 do
+					pcall(function() AbilitySpam5:fullcustom(i) end)
+					task.wait()
 					wallcomboveryud()
+					task.wait()
+					pcall(function() AbilitySpam5:fullcustom2() end)
+					end
 				end
 		end
 		SpecialSection1:AddToggle({ Name = "Wall Combo", Flag = "WallCombo", Default = Cfg.WallCombo, Callback = function(v) Cfg.WallCombo = v; updateWallComboSpam() end })
