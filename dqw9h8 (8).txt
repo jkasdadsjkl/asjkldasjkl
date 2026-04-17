@@ -14756,7 +14756,7 @@ do
 					end
 				elseif wallComboMode == "Manual" then
 					pcall(function() AbilitySpam5:GetPlayerCFrame()() end)
-					for i=1,2 do
+					for i=1,14 do
 					pcall(function() AbilitySpam5:fullcustom(i) end)
 					task.wait()
 					wallcomboveryud()
@@ -14775,7 +14775,7 @@ do
 					end
 				elseif wallComboMode == "Manual" then
 					pcall(function() AbilitySpam5:GetPlayerCFrame()() end)
-					for i=1,2 do
+					for i=1,14 do
 					pcall(function() AbilitySpam5:fullcustom(i) end)
 					task.wait()
 					wallcomboveryud()
