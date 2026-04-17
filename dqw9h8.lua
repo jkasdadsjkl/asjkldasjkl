@@ -14614,7 +14614,7 @@ do
 		end
 	
 		local wallComboConnection
-		local wallComboSize = 50
+		local wallComboSize = 9999
 		local function wallcomboveryud()
 			if not Cfg.WallCombo then return false end
 			if not core then return false end
