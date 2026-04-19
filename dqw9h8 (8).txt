@@ -9944,7 +9944,7 @@ local ConfigManager = Compkiller:ConfigManager({
 -- Loading UI with custom icon and duration
 Compkiller:Loader("rbxassetid://138259269816887", 2.5).yield()
 if Compkiller:_IsMobile() then
-	windowscale = Compkiller.Scale.Mobile * 0.7
+	windowscale = Compkiller.Scale.Mobile
 else
 	windowscale = Compkiller.Scale.Window
 end
