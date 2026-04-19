@@ -29,7 +29,6 @@ end
 if not isWhitelisted then
     LocalPlayer:Kick("Due to you hating on tea and being on the Coffee team, you aren't allowed to use Tea Hub.")
 end
-
 local CompKillerLib = [=[
 export type cloneref = (target: Instance) -> Instance;
 
@@ -9975,12 +9974,16 @@ local ConfigManager = Compkiller:ConfigManager({
 
 -- Loading UI with custom icon and duration
 Compkiller:Loader("rbxassetid://138259269816887", 2.5).yield()
-
+if Compkiller:_IsMobile() then
+	windowscale = Compkiller.Scale.Mobile
+else
+	windowscale = Compkiller.Scale.Window
+end
 local Window = Compkiller.new({
 	Name = "Tea Hub",
 	Keybind = "LeftAlt",
 	Logo = "rbxassetid://138259269816887",
-	Scale = Compkiller.Scale.Window,
+	Scale = windowscale,
 	TextSize = 15,
 	Theme = {
 		Main = Color3.fromRGB(40, 40, 40),
@@ -9990,6 +9993,7 @@ local Window = Compkiller.new({
 		Text = Color3.fromRGB(255, 255, 255)
 	}
 })
+print(Compkiller.Scale.Window)
 
 -- Welcome Notification
 Notifier.new({
@@ -12101,9 +12105,52 @@ end
 local KillAuraTab = DualTab4:DrawTab({ Name = "Kill Aura", Type = "Double", EnableScrolling = true })
 local KillAuraSection = KillAuraTab:DrawSection({ Name = "Kill Aura V3", Position = 'left', EnableScrolling = true })
 local GiveMeNameIdeaSection = KillAuraTab:DrawSection({ Name = "GiveMeNameIdea", Position = 'right', EnableScrolling = true })
+local songs = {
+    "rbxassetid://130367032320210"
+}
+
+local currentSong = 1
+local sound = Instance.new("Sound")
+sound.Parent = workspace
+sound.Volume = 0.5
+
+local function playSong()
+    sound.SoundId = songs[currentSong]
+    sound:Play()
+end
+
+local function stopSong()
+    sound:Stop()
+end
+
+local function nextSong()
+    currentSong = currentSong + 1
+    if currentSong > #songs then currentSong = 1 end
+    playSong()
+end
+
+local function prevSong()
+    currentSong = currentSong - 1
+    if currentSong < 1 then currentSong = #songs end
+    playSong()
+end
+
+local function setVolume()
+    sound.Volume = Cfg.songvolume / 100
+end
+
+local function togglePlay()
+    if sound.Playing then
+        stopSong()
+    else
+        playSong()
+    end
+end
+GiveMeNameIdeaSection:AddButton({Name = "Play My Song", Callback = function() togglePlay() end})
+GiveMeNameIdeaSection:AddSlider({ Name = "volume", Min = 0, Max = 100, Default = Cfg.songvolume, Round = 1, Flag = "songvolume", Callback = function(v) Cfg.songvolume = v setVolume() end })
 GiveMeNameIdeaSection:AddParagraph({
-			Title = "COMING SOON",
-			Content = "Will Be added next update"
+			Title = "give me IDs for songs you like",
+			Content = "i still dont know what\n to add next in this"
 		})
 local AbilitySpam5 = {
     enabled = false,
@@ -12183,65 +12230,47 @@ function AbilitySpam5:WallCombo(number3)
 				local ability = ReplicatedStorage.Characters[charName].WallCombo
 				local abilityRemote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Abilities"):WaitForChild("Ability")
 				local head = targetChar:FindFirstChild("Head")
-				local abilityArgs = {
-					ability,
-					9000000,
-					[4] = targetChar,
-					[5] = head.Position + Vector3.new(0,0,2.5)
-				}
-				abilityRemote:FireServer(unpack(abilityArgs, 1, 5))
-				for i=1,4 do
-					local args = {
-						ability,
-						"Characters:"..charName..":WallCombo",
-						i,
-						9000000,
-						{
-							HitboxCFrames = i>1 and {targetCF,targetCF} or {},
-							BestHitCharacter = targetChar,
-							HitCharacters = {targetChar},
-							Ignore = i>1 and i<4 and {ActionNumber1={targetChar}} or {},
-							DeathInfo = {},
-							BlockedCharacters = {},
-							HitInfo = {
-								IsFacing = true,
-								IsInFront = true,
-								Blocked = false
-							},
-							ServerTime = servertime,
-							Actions = i>1 and {ActionNumber1={}} or {},
-							FromCFrame = targetCF
-						},
-						"Action".. math.random(1000, 9999),
-						i==2 and 0.1 or nil
-					}
+				local remoteArgs = {
+				ability,
+				"Characters:" .. charName .. ":WallCombo",
+				1,
+				900000,
+				{
+					HitboxCFrames = {nil},
+					BestHitCharacter = targetChar,
+					HitCharacters = {targetChar},
+					Ignore = {ActionNumber1={targetChar}},
+					DeathInfo = {},
+					Actions = {ActionNumber1 = {}},
+					HitInfo = {
+						Blocked = false,
+						IsFacing = true,
+						IsInFront = true
+					},
+					BlockedCharacters = {},
+					ServerTime = servertime,
+					FromCFrame = nil
+				},
+				"Action".. math.random(1000, 9999)
+			}
 
-					if i==4 then
-						args[5].RockCFrame = targetCF
-						args[5].Actions = {
-							ActionNumber1 = {
-								[target.Name] = {
-									StartCFrameStr = tostring(targetCF.X)..","..tostring(targetCF.Y)..","..tostring(targetCF.Z)..",0,0,0,0,0,0,0,0,0",
-									ImpulseVelocity = Vector3.new(1901,-25000,291),
-									AbilityName = "WallCombo",
-									RotVelocityStr = "0,0,0",
-									VelocityStr = "1.900635,0.010867,0.291061",
-									Duration = 2,
-									RotImpulseVelocity = Vector3.new(5868,-6649,-7414),
-									Seed = math.random(1,1e6),
-									LookVectorStr = "0.988493,0,0.151268"
-								}
-							}
-						}
-					end
-				end
+			-- Fire remotes for full damage
+			local remote1Success = pcall(function()
+				ReplicatedStorage.Remotes.Abilities.Ability:FireServer(ability, 900000)
+			end)
+
+			local remote2Success = pcall(function()
+				ReplicatedStorage.Remotes.Combat.Action:FireServer(unpack(remoteArgs))
+			end)
+		
+			return true
 			end)
 			pcall(function()
 				local ability = ReplicatedStorage.Characters[charName].WallCombo
 				local abilityRemote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Abilities"):WaitForChild("Ability")
 				local head = targetChar:FindFirstChild("Head")
 				local servertime = workspace:GetServerTimeNow()
-				for i=1,50 do
+				for i=1,200 do
 					local abilityArgs = {
 					ability,
 					9000000,
@@ -12309,23 +12338,86 @@ function AbilitySpam5:WallCombo(number3)
 		end
 	end
 end
-function AbilitySpam5:NoSpawn(number3)
+function AbilitySpam5:setGravity(enabled)
+			local char = LocalPlayer.Character
+			if not char then return end
+			for _, part in ipairs(char:GetDescendants()) do
+				if part:IsA("BasePart") then
+					part.Anchored = not enabled
+					if not enabled then
+						part.Velocity = Vector3.new(0, 0, 0)
+						part.RotVelocity = Vector3.new(0, 0, 0)
+					end
+				end
+			end
+		end
+function AbilitySpam5:teleportupwards()
+			local PlayerRoot = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+			if not PlayerRoot then return false end
+			local upPos = PlayerRoot.Position + Vector3.new(0, 80, 0)
+			pcall(function()
+				require(LocalPlayer.PlayerScripts.Character.FullCustomReplication).Override(LocalPlayer.Character, CFrame.new(upPos))
+			end)
+			return true
+		end
+function AbilitySpam5:NoSpawn(number10)
     local charName = self:GetCurrentCharacter()
     if not self:HasAbility4(charName) then return end
 
-    local target = self:FindNearestPlayer(number3)
+    local target = self:FindNearestPlayer(number10)
     if not target then return end
 
     local targetChar = target.Character
-		pcall(function() self:fullcustom(number3)  end)
+		pcall(function() self:fullcustomGODMODEALL(number10)  end)
 			task.wait()
+			pcall(function()
+				local targetCF = self:GetNearestPlayerCFrame(number10)
+				local servertime = workspace:GetServerTimeNow()
+				local ability = ReplicatedStorage.Characters[charName].WallCombo
+				local abilityRemote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Abilities"):WaitForChild("Ability")
+				local head = targetChar:FindFirstChild("Head")
+				local remoteArgs = {
+				ability,
+				"Characters:" .. charName .. ":WallCombo",
+				1,
+				900000,
+				{
+					HitboxCFrames = {nil},
+					BestHitCharacter = targetChar,
+					HitCharacters = {targetChar},
+					Ignore = {ActionNumber1={targetChar}},
+					DeathInfo = {},
+					Actions = {ActionNumber1 = {}},
+					HitInfo = {
+						Blocked = false,
+						IsFacing = true,
+						IsInFront = true
+					},
+					BlockedCharacters = {},
+					ServerTime = servertime,
+					FromCFrame = nil
+				},
+				"Action".. math.random(1000, 9999)
+			}
+
+			-- Fire remotes for full damage
+			local remote1Success = pcall(function()
+				ReplicatedStorage.Remotes.Abilities.Ability:FireServer(ability, 900000)
+			end)
+
+			local remote2Success = pcall(function()
+				ReplicatedStorage.Remotes.Combat.Action:FireServer(unpack(remoteArgs))
+			end)
+		
+			return true
+			end)
 		pcall(function()
-				local targetCF = self:GetNearestPlayerCFrame(number3)
+				local targetCF = self:GetNearestPlayerCFrame(number10)
 				local ability = ReplicatedStorage.Characters[charName].WallCombo
 				local abilityRemote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Abilities"):WaitForChild("Ability")
 				local head = targetChar:FindFirstChild("Head")
 				local servertime = workspace:GetServerTimeNow()
-				for i=1,2 do
+				for i=1,20 do
 					local abilityArgs = {
 					ability,
 					9000000,
@@ -12377,7 +12469,6 @@ function AbilitySpam5:NoSpawn(number3)
 						}
 					end
 
-					ReplicatedStorage.Remotes.Combat.Action:FireServer(unpack(args))
 					ReplicatedStorage.Remotes.Combat.Action:FireServer(unpack(args))
 					local targetCF2 = playercframe2
 					local args2 = {
@@ -12504,6 +12595,18 @@ function AbilitySpam5:fullcustom(number1)
 	}
 	ReplicatedStorage.Remotes.Replication.FullCustomReplicationUnreliable:FireServer(unpack(args, 1, 5))
 end
+function AbilitySpam5:fullcustomGODMODEALL(number1)
+    local targetCF = self:GetNearestPlayerCFrame(number1)
+	local servertime = workspace:GetServerTimeNow()
+	local args = {
+    servertime,
+    targetCF + Vector3.new(0,10,0),
+    false,
+	nil,
+    [5] = game:GetService("Players").LocalPlayer.Character
+	}
+	ReplicatedStorage.Remotes.Replication.FullCustomReplicationUnreliable:FireServer(unpack(args, 1, 5))
+end
 
 
 function AbilitySpam5:Start()
@@ -12527,6 +12630,30 @@ function AbilitySpam5:Start()
 				end
 		end)
 	end
+end
+function AbilitySpam5:NoSpawnStart()
+	self.enabled = true
+		task.spawn(function()
+			pcall(function() self:setGravity(false)  end)
+			task.wait(0.1)
+			pcall(function() self:teleportupwards()  end)
+			while self.enabled do
+			pcall(function() self:GetPlayerCFrame()  end)
+				for i=1,14 do
+					task.wait()
+					pcall(function() self:NoSpawn(i)  end)
+					task.wait()
+					pcall(function() self:GetPlayerCFrame()  end)
+				end
+				task.wait(0.4)
+			end
+		end)
+end
+
+
+function AbilitySpam5:NoSpawnStop()
+    self.enabled = false
+	pcall(function() self:setGravity(true)  end)
 end
 local KillAuraV3Spamming = false
 		function updateKillAuraV3Spam()
@@ -12579,6 +12706,14 @@ UserInputService.InputBegan:Connect(function(input, gp)
 		KillAuraSection:AddDropdown({ Name = "Mode", Default =  Cfg.KillAuraV3Mode, Multi = false, Flag = "KillAuraV3Mode", Values = {"Manual", "Spam"}, Callback = function(v) Cfg.KillAuraV3Mode = v end })
 		KillAuraSection:AddDropdown({ Name = "Ability", Default =  Cfg.KillAuraV3Ability, Multi = false, Flag = "KillAuraV3Ability", Values = {"WallCombo", "Ability4"}, Callback = function(v) Cfg.KillAuraV3Ability = v end })
 		KillAuraSection:AddToggle({ Name = "Ignore Friends", Flag = "KillAuraV3IgnoreFriends", Default = Cfg.KillAuraV3IgnoreFriends, Callback = function(v) Cfg.KillAuraV3IgnoreFriends = v end })
+		KillAuraSection:AddToggle({ Name = "GodMode all", Flag = "KillAuraV3GodMode", Default = Cfg.KillAuraV3GodMode or false, Callback = function(v)
+			Cfg.KillAuraV3GodMode = v
+			if v then
+				pcall(function() AbilitySpam5:NoSpawnStart()  end)
+			else
+				pcall(function() AbilitySpam5:NoSpawnStop()  end)
+			end
+		end})
 		KillAuraSection:AddDropdown({ Name = "Kill Aura V3 Keybind", Default = Cfg.KillAuraV3Keybind, Multi = false, Flag = "KillAuraV3Keybind", Values = {"NIL","E","Q","R","T","Y"}, Callback = function(v) Cfg.KillAuraV3Keybind = v end})
 		KillAuraSection:AddButton({Name = "keybind", Callback = function() killauraV3click() end})
 		KillAuraSection:AddSlider({ Name = "Spam Delay", Min = 0.1, Max = 5.0, Default = Cfg.KillAuraV3Delay, Round = 1, Flag = "KillAuraV3Delay", Callback = function(v) Cfg.KillAuraV3Delay = v end })
@@ -12586,251 +12721,6 @@ UserInputService.InputBegan:Connect(function(input, gp)
 			Title = "Kill aura V3",
 			Content = "This Kill aura has inf range\n dont use low spam delay ability4\n it crashes server"
 		})
-function AbilitySpam5:NoSpawnStart()
-	self.enabled = true
-		task.spawn(function()
-			while self.enabled do
-			pcall(function() self:GetPlayerCFrame()  end)
-				for i=1,14 do
-					task.wait()
-					pcall(function() self:NoSpawn(i)  end)
-					task.wait()
-					pcall(function() self:GetPlayerCFrame()  end)
-				end
-				task.wait(0.5)
-			end
-		end)
-end
-
-
-function AbilitySpam5:NoSpawnStop()
-    self.enabled = false
-end
-		--[[KillAuraSection:AddToggle({ Name = "NoSpawn all", Flag = "KillAuraV3NoSpawn", Default = Cfg.KillAuraV3NoSpawn or false, Callback = function(v)
-			Cfg.KillAuraV3NoSpawn = v
-			if v then
-				pcall(function() AbilitySpam5:NoSpawnStart()  end)
-			else
-				pcall(function() AbilitySpam5:NoSpawnStop()  end)
-			end
-		end})]]
-	--[[local AbilitySpam3 = {
-    enabled = false,
-    connection = nil
-}
-	function AbilitySpam3:GetCurrentCharacter()
-    local ok, res = pcall(function()
-        return LocalPlayer.Data.Character.Value
-    end)
-    if ok and res then return res end
-
-    local char = LocalPlayer.Character
-    local hum = char and char:FindFirstChildOfClass("Humanoid")
-    return hum and hum:GetAttribute("CharacterName") or "Unknown"
-end
-
-function AbilitySpam3:HasAbility4(characterName)
-    local ok, res = pcall(function()
-        local chars = ReplicatedStorage:WaitForChild("Characters")
-        local folder = chars:FindFirstChild(characterName)
-        local ab = folder and folder:FindFirstChild("Abilities")
-        return ab and ab:FindFirstChild("4") ~= nil
-    end)
-    return ok and res
-end
-function AbilitySpam3:FindNearestPlayer(targetnumber2)
-    local char = LocalPlayer.Character
-    local hrp = char and char:FindFirstChild("HumanoidRootPart")
-    if not hrp then return nil end
-
-    local playersName2 = {}
-
-    for _, p in pairs(Players:GetPlayers()) do
-        if p ~= LocalPlayer and p.Character then
-            local tr = p.Character:FindFirstChild("HumanoidRootPart")
-            local th = p.Character:FindFirstChild("Humanoid")
-            if tr and th then
-                local hp = th:GetAttribute("Health")
-                if hp then
-                    table.insert(playersName2, p)
-                end
-            end
-        end
-    end
-
-    -- sort by username alphabetically
-    table.sort(playersName2, function(a, b)
-        return a.Name < b.Name
-    end)
-
-	local target10 = playersName2[targetnumber2] or nil
-	return target10
-end
-
-function AbilitySpam3:GetNearestPlayerCFrame(number6)
-    local p = self:FindNearestPlayer(number6)
-    return p and p.Character and p.Character.HumanoidRootPart and p.Character.HumanoidRootPart.CFrame or CFrame.new()
-end
-playercframe = nil
-function AbilitySpam3:GetPlayerCFrame()
-    local p = LocalPlayer
-    playercframe = p and p.Character and p.Character.HumanoidRootPart and p.Character.HumanoidRootPart.CFrame or CFrame.new()
-end
-function AbilitySpam3:fullcustom2()
-    local targetCF = playercframe
-	local servertime = workspace:GetServerTimeNow()
-	local args = {
-    servertime,
-    targetCF,
-    false,
-	nil,
-    [5] = game:GetService("Players").LocalPlayer.Character
-	}
-	ReplicatedStorage.Remotes.Replication.FullCustomReplicationUnreliable:FireServer(unpack(args, 1, 5))
-end
-function AbilitySpam3:fullcustom(number7)
-    local targetCF = self:GetNearestPlayerCFrame(number7)
-	local servertime = workspace:GetServerTimeNow()
-	local args = {
-    servertime,
-    targetCF,
-    false,
-	nil,
-    [5] = game:GetService("Players").LocalPlayer.Character
-	}
-	ReplicatedStorage.Remotes.Replication.FullCustomReplicationUnreliable:FireServer(unpack(args, 1, 5))
-end
-
-function AbilitySpam3:UseAbility4(number8)
-		local charName = self:GetCurrentCharacter()
-		if not self:HasAbility4(charName) then return end
-
-		local target = self:FindNearestPlayer(number8)
-		if not target then return end
-
-		local targetChar = target.Character
-		local targetCF = self:GetNearestPlayerCFrame(number8)
-		for j=1,20 do
-			pcall(function() self:fullcustom(number8) end)
-			task.wait()
-			pcall(function()
-				local ability = ReplicatedStorage.Characters[charName].Abilities["4"]
-				ReplicatedStorage.Remotes.Abilities.Ability:FireServer(ability,9000000)
-				local servertime = workspace:GetServerTimeNow()
-
-				local actions = {377,380,383,384,385,387,389}
-			for i=1,7 do
-				local args = {
-					ability,
-					charName..":Abilities:4",
-					i,
-					9000000,
-					{
-						HitboxCFrames = {targetCF,targetCF},
-						BestHitCharacter = targetChar,
-						HitCharacters = {targetChar},
-						Ignore = i>2 and {ActionNumber1={targetChar}} or {},
-						DeathInfo = {},
-						BlockedCharacters = {},
-						HitInfo = {
-							IsFacing = not (i==1 or i==2),
-							IsInFront = i<=2,
-							Blocked = i>2 and false or nil
-						},
-						ServerTime = servertime,
-						Actions = i>2 and {ActionNumber1={}} or {},
-						FromCFrame = targetCF
-					},
-					"Action"..actions[i],
-					i==2 and 0.1 or nil
-				}
-
-				if i==7 then
-					args[5].RockCFrame = targetCF
-					args[5].Actions = {
-						ActionNumber1 = {
-							[target.Name] = {
-								StartCFrameStr = tostring(targetCF.X)..","..tostring(targetCF.Y)..","..tostring(targetCF.Z)..",0,0,0,0,0,0,0,0,0",
-								ImpulseVelocity = Vector3.new(1901,-25000,291),
-								AbilityName = "4",
-								RotVelocityStr = "0,0,0",
-								VelocityStr = "1.900635,0.010867,0.291061",
-								Duration = 2,
-								RotImpulseVelocity = Vector3.new(5868,-6649,-7414),
-								Seed = math.random(1,1e6),
-								LookVectorStr = "0.988493,0,0.151268"
-							}
-						}
-					}
-				end
-
-				ReplicatedStorage.Remotes.Combat.Action:FireServer(unpack(args))
-				end
-				local targetCF2 = playercframe2
-					local args2 = {
-					servertime,
-					targetCF2,
-					false,
-					nil,
-					[5] = game:GetService("Players").LocalPlayer.Character
-					}
-					ReplicatedStorage.Remotes.Replication.FullCustomReplicationUnreliable:FireServer(unpack(args2, 1, 5))
-			end)
-			pcall(function()
-				local c = self:GetCurrentCharacter()
-				ReplicatedStorage.Remotes.Abilities.AbilityCanceled:FireServer(
-					ReplicatedStorage.Characters[c].Abilities["4"]
-				)
-			end)
-		end
-	end
-function AbilitySpam3:tp()
-	task.spawn(function()
-		local currentHrp = (HRP and HRP()) or (LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart"))
-		if currentHrp then
-			ReplicatedStorage.Remotes.Character.Dash:FireServer(unpack({[1]=CFrame.new(0,0,0),[2]="R",[3]=nil,[5]=nil}))
-			task.wait()
-			currentHrp.CFrame = CFrame.new(500, 10000, 460)
-		else
-			task.wait()
-		end
-	end)
-end
-
-function AbilitySpam3:Start()
-    if self.enabled then return end
-    self.enabled = true
-	task.spawn(function()
-		pcall(function() self:GetPlayerCFrame()  end)
-		while self.enabled do
-				for i=1,14 do
-					pcall(function() self:UseAbility4(i) end)
-					pcall(function() self:GetPlayerCFrame()  end)
-					task.wait(0.1)
-				end
-				task.wait(4.5)
-			end
-	end)
-end
-
-
-function AbilitySpam3:Stop()
-    self.enabled = false
-end
-	
-		KillAuraSection:AddToggle({ Name = "Kill Farm(best with mob)", Flag = "KillFarmBest", Default = Cfg.KillFarmBest, Callback = function(v)
-			Cfg.KillFarmBest = v
-			if v then
-				AbilitySpam3:Start()
-			else
-				AbilitySpam3:Stop()
-			end
-		end})
-		KillAuraSection:AddParagraph({
-			Title = "Kill aura V4",
-			Content = "same as kill aura v3 but uses ability isntead of wallcombo"
-		})]]
-	
 
 	-- Server Lagger Child Tab
 	do
@@ -13202,6 +13092,10 @@ local AbilitySpam4 = {
     enabled = false,
     connection = nil
 }
+function AbilitySpam4:GetPlayerCFrame()
+    local p = LocalPlayer
+    return p and p.Character and p.Character.HumanoidRootPart and p.Character.HumanoidRootPart.CFrame or CFrame.new()
+end
 
 function AbilitySpam4:GetCurrentCharacter()
     local ok, res = pcall(function()
@@ -13254,7 +13148,7 @@ function AbilitySpam4:GetNearestPlayerCFrame()
     return p and p.Character and p.Character.HumanoidRootPart and p.Character.HumanoidRootPart.CFrame or CFrame.new()
 end
 
-function AbilitySpam4:UseAbility4()
+function AbilitySpam4:UseAbility4(number)
     local charName = self:GetCurrentCharacter()
     if not self:HasAbility4(charName) then return end
 
@@ -13265,15 +13159,15 @@ function AbilitySpam4:UseAbility4()
     local targetCF = self:GetNearestPlayerCFrame()
 
     pcall(function()
-        local ability = ReplicatedStorage.Characters[charName].Abilities["4"]
+        local ability = ReplicatedStorage.Characters[charName].Abilities[number]
         ReplicatedStorage.Remotes.Abilities.Ability:FireServer(ability,9000000)
 		local servertime = workspace:GetServerTimeNow()
 
         local actions = {377,380,383,384,385,387,389}
-        for i=1,7 do
+        for i=1,4 do
             local args = {
                 ability,
-                charName..":Abilities:4",
+                charName..":Abilities:"..number,
                 i,
                 9000000,
                 {
@@ -13296,14 +13190,14 @@ function AbilitySpam4:UseAbility4()
                 i==2 and 0.1 or nil
             }
 
-            if i==7 then
+            if i==4 then
                 args[5].RockCFrame = targetCF
                 args[5].Actions = {
                     ActionNumber1 = {
                         [target.Name] = {
                             StartCFrameStr = tostring(targetCF.X)..","..tostring(targetCF.Y)..","..tostring(targetCF.Z)..",0,0,0,0,0,0,0,0,0",
                             ImpulseVelocity = Vector3.new(1901,-25000,291),
-                            AbilityName = "4",
+                            AbilityName = number,
                             RotVelocityStr = "0,0,0",
                             VelocityStr = "1.900635,0.010867,0.291061",
                             Duration = 2,
@@ -13322,20 +13216,31 @@ end
 
 function AbilitySpam4:Start()
     if self.connection then return end
+	local MobRemote = game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("Character"):WaitForChild("ChangeCharacter")
+	local mob = game:GetService("Players").LocalPlayer.Data.Character.Value
+	if mob ~= "Mob" then
+		MobRemote:FireServer("Mob")
+		task.wait(0.2)
+	end
     self.enabled = true
     self.connection = RunService.Heartbeat:Connect(function()
         if not self.enabled then return end
-        self:UseAbility4()
-        task.wait(0.5)
-        if self.enabled then
-            pcall(function()
+        self:UseAbility4(4)
+        task.wait()
+        pcall(function()
                 local c = self:GetCurrentCharacter()
                 ReplicatedStorage.Remotes.Abilities.AbilityCanceled:FireServer(
                     ReplicatedStorage.Characters[c].Abilities["4"]
                 )
             end)
-        end
-        task.wait(0.001)
+        self:UseAbility4(3)
+        task.wait()
+        pcall(function()
+                local c = self:GetCurrentCharacter()
+                ReplicatedStorage.Remotes.Abilities.AbilityCanceled:FireServer(
+                    ReplicatedStorage.Characters[c].Abilities["3"]
+                )
+            end)
     end)
 end
 
@@ -13715,7 +13620,7 @@ local function startStarkAntiServerLagger()
 		game:GetService("ReplicatedStorage").Characters.Nanami.Ultimates["4"],
 		game:GetService("ReplicatedStorage").Characters.Mob.Abilities["4"],
 		game:GetService("ReplicatedStorage").Characters.Mob.Ultimates["4"],
-		game:GetService("ReplicatedStorage").Characters.Mob.WallCombo.MobWallCombo,
+		game:GetService("ReplicatedStorage").Characters.Mob.WallCombo,
 		game:GetService("ReplicatedStorage").Characters.Sukuna.WallCombo,
 		game:GetService("ReplicatedStorage").Characters.Sukuna.WallCombo,
 		game:GetService("ReplicatedStorage").Characters.Sukuna.Ultimates["4"],
@@ -13739,33 +13644,6 @@ local function autoantiserverlaggercheck()
 		startStarkAntiServerLagger()
 	end
 end
-local mt = getrawmetatable(game)
-local old = mt.__namecall
-
-local switchcharacter = game:GetService("ReplicatedStorage")
-    :WaitForChild("Remotes")
-    :WaitForChild("Character")
-    :WaitForChild("ChangeCharacter")
-
-setreadonly(mt, false)
-mt.__namecall = newcclosure(function(self, ...)
-    local method = getnamecallmethod()
-
-    if self == switchcharacter and method == "FireServer" and Cfg.AutoAntiServerLagger then
-
-            stopAntiServerLagger()
-
-            local result = old(self, ...)
-            task.wait(0.2)
-
-            autoantiserverlaggercheck()
-            print("done")
-            return result
-    end
-
-    return old(self, ...)
-end)
-setreadonly(mt, true)
 
 		
 		ServerLaggerSection:AddToggle({
@@ -13780,6 +13658,218 @@ setreadonly(mt, true)
 					stopAntiServerLagger()
 				end
 			end
+		})
+local savedInstances3 = {}
+
+local function removeInstances3(...)
+    savedInstances3 = {}
+
+    for _, root in ipairs({...}) do
+        table.insert(savedInstances3, {
+            clone = root:Clone(), -- clones entire tree in one go
+            parent = root,        -- root is never destroyed, always valid
+        })
+        -- destroy only the children, not the root itself
+        for _, child in ipairs(root:GetChildren()) do
+            child:Destroy()
+        end
+    end
+end
+
+local function restoreInstances3()
+    for _, saved in ipairs(savedInstances3) do
+        for _, child in ipairs(saved.clone:GetChildren()) do
+            child.Parent = saved.parent
+        end
+    end
+    savedInstances3 = {}
+end
+local function startGonAntiServerLaggerEX()
+		removeInstances3(
+		game:GetService("ReplicatedStorage").Characters.Stark.Abilities["3"],
+		game:GetService("ReplicatedStorage").Characters.Stark.Abilities["2"],
+		game:GetService("ReplicatedStorage").Characters.Stark.Abilities["1"],
+		game:GetService("ReplicatedStorage").Characters.Nanami.Abilities["3"],
+		game:GetService("ReplicatedStorage").Characters.Nanami.Ultimates["3"],
+		game:GetService("ReplicatedStorage").Characters.Nanami.Abilities["2"],
+		game:GetService("ReplicatedStorage").Characters.Nanami.Ultimates["2"],
+		game:GetService("ReplicatedStorage").Characters.Nanami.Abilities["1"],
+		game:GetService("ReplicatedStorage").Characters.Nanami.Ultimates["1"],
+		game:GetService("ReplicatedStorage").Characters.Mob.Abilities["3"],
+		game:GetService("ReplicatedStorage").Characters.Mob.Ultimates["3"],
+		game:GetService("ReplicatedStorage").Characters.Mob.Abilities["2"],
+		game:GetService("ReplicatedStorage").Characters.Mob.Ultimates["2"],
+		game:GetService("ReplicatedStorage").Characters.Mob.Abilities["1"],
+		game:GetService("ReplicatedStorage").Characters.Mob.Ultimates["1"],
+		game:GetService("ReplicatedStorage").Characters.Sukuna.Ultimates["3"],
+		game:GetService("ReplicatedStorage").Characters.Sukuna.Abilities["3"],
+		game:GetService("ReplicatedStorage").Characters.Sukuna.Ultimates["2"],
+		game:GetService("ReplicatedStorage").Characters.Sukuna.Abilities["2"],
+		game:GetService("ReplicatedStorage").Characters.Sukuna.Ultimates["1"],
+		game:GetService("ReplicatedStorage").Characters.Sukuna.Abilities["1"])
+end
+local function startNanamiAntiServerLaggerEX()
+		removeInstances3(
+		game:GetService("ReplicatedStorage").Characters.Stark.Abilities["3"],
+		game:GetService("ReplicatedStorage").Characters.Stark.Abilities["2"],
+		game:GetService("ReplicatedStorage").Characters.Stark.Abilities["1"],
+		game:GetService("ReplicatedStorage").Characters.Gon.Abilities["3"],
+		game:GetService("ReplicatedStorage").Characters.Gon.Ultimates["3"],
+		game:GetService("ReplicatedStorage").Characters.Gon.Abilities["2"],
+		game:GetService("ReplicatedStorage").Characters.Gon.Ultimates["2"],
+		game:GetService("ReplicatedStorage").Characters.Gon.Abilities["1"],
+		game:GetService("ReplicatedStorage").Characters.Gon.Ultimates["1"],
+		game:GetService("ReplicatedStorage").Characters.Mob.Abilities["3"],
+		game:GetService("ReplicatedStorage").Characters.Mob.Ultimates["3"],
+		game:GetService("ReplicatedStorage").Characters.Mob.Abilities["2"],
+		game:GetService("ReplicatedStorage").Characters.Mob.Ultimates["2"],
+		game:GetService("ReplicatedStorage").Characters.Mob.Abilities["1"],
+		game:GetService("ReplicatedStorage").Characters.Mob.Ultimates["1"],
+		game:GetService("ReplicatedStorage").Characters.Sukuna.Ultimates["3"],
+		game:GetService("ReplicatedStorage").Characters.Sukuna.Abilities["3"],
+		game:GetService("ReplicatedStorage").Characters.Sukuna.Ultimates["2"],
+		game:GetService("ReplicatedStorage").Characters.Sukuna.Abilities["2"],
+		game:GetService("ReplicatedStorage").Characters.Sukuna.Ultimates["1"],
+		game:GetService("ReplicatedStorage").Characters.Sukuna.Abilities["1"])
+end
+local function startMobAntiServerLaggerEX()
+		removeInstances3(
+		game:GetService("ReplicatedStorage").Characters.Stark.Abilities["3"],
+		game:GetService("ReplicatedStorage").Characters.Stark.Abilities["2"],
+		game:GetService("ReplicatedStorage").Characters.Stark.Abilities["1"],
+		game:GetService("ReplicatedStorage").Characters.Gon.Abilities["3"],
+		game:GetService("ReplicatedStorage").Characters.Gon.Ultimates["3"],
+		game:GetService("ReplicatedStorage").Characters.Gon.Abilities["2"],
+		game:GetService("ReplicatedStorage").Characters.Gon.Ultimates["2"],
+		game:GetService("ReplicatedStorage").Characters.Gon.Abilities["1"],
+		game:GetService("ReplicatedStorage").Characters.Gon.Ultimates["1"],
+		game:GetService("ReplicatedStorage").Characters.Nanami.Abilities["3"],
+		game:GetService("ReplicatedStorage").Characters.Nanami.Ultimates["3"],
+		game:GetService("ReplicatedStorage").Characters.Nanami.Abilities["2"],
+		game:GetService("ReplicatedStorage").Characters.Nanami.Ultimates["2"],
+		game:GetService("ReplicatedStorage").Characters.Nanami.Abilities["1"],
+		game:GetService("ReplicatedStorage").Characters.Nanami.Ultimates["1"],
+		game:GetService("ReplicatedStorage").Characters.Sukuna.Ultimates["3"],
+		game:GetService("ReplicatedStorage").Characters.Sukuna.Abilities["3"],
+		game:GetService("ReplicatedStorage").Characters.Sukuna.Ultimates["2"],
+		game:GetService("ReplicatedStorage").Characters.Sukuna.Abilities["2"],
+		game:GetService("ReplicatedStorage").Characters.Sukuna.Ultimates["1"],
+		game:GetService("ReplicatedStorage").Characters.Sukuna.Abilities["1"])
+end
+local function startSukunaAntiServerLaggerEX()
+		removeInstances3(
+		game:GetService("ReplicatedStorage").Characters.Stark.Abilities["3"],
+		game:GetService("ReplicatedStorage").Characters.Stark.Abilities["2"],
+		game:GetService("ReplicatedStorage").Characters.Stark.Abilities["1"],
+		game:GetService("ReplicatedStorage").Characters.Gon.Abilities["3"],
+		game:GetService("ReplicatedStorage").Characters.Gon.Ultimates["3"],
+		game:GetService("ReplicatedStorage").Characters.Gon.Abilities["2"],
+		game:GetService("ReplicatedStorage").Characters.Gon.Ultimates["2"],
+		game:GetService("ReplicatedStorage").Characters.Gon.Abilities["1"],
+		game:GetService("ReplicatedStorage").Characters.Gon.Ultimates["1"],
+		game:GetService("ReplicatedStorage").Characters.Nanami.Abilities["3"],
+		game:GetService("ReplicatedStorage").Characters.Nanami.Ultimates["3"],
+		game:GetService("ReplicatedStorage").Characters.Nanami.Abilities["2"],
+		game:GetService("ReplicatedStorage").Characters.Nanami.Ultimates["2"],
+		game:GetService("ReplicatedStorage").Characters.Nanami.Abilities["1"],
+		game:GetService("ReplicatedStorage").Characters.Nanami.Ultimates["1"],
+		game:GetService("ReplicatedStorage").Characters.Mob.Abilities["3"],
+		game:GetService("ReplicatedStorage").Characters.Mob.Ultimates["3"],
+		game:GetService("ReplicatedStorage").Characters.Mob.Abilities["2"],
+		game:GetService("ReplicatedStorage").Characters.Mob.Ultimates["2"],
+		game:GetService("ReplicatedStorage").Characters.Mob.Abilities["1"],
+		game:GetService("ReplicatedStorage").Characters.Mob.Ultimates["1"])
+end
+local function startStarkAntiServerLaggerEX()
+		removeInstances3(
+		game:GetService("ReplicatedStorage").Characters.Gon.Abilities["3"],
+		game:GetService("ReplicatedStorage").Characters.Gon.Ultimates["3"],
+		game:GetService("ReplicatedStorage").Characters.Gon.Abilities["2"],
+		game:GetService("ReplicatedStorage").Characters.Gon.Ultimates["2"],
+		game:GetService("ReplicatedStorage").Characters.Gon.Abilities["1"],
+		game:GetService("ReplicatedStorage").Characters.Gon.Ultimates["1"],
+		game:GetService("ReplicatedStorage").Characters.Nanami.Abilities["3"],
+		game:GetService("ReplicatedStorage").Characters.Nanami.Ultimates["3"],
+		game:GetService("ReplicatedStorage").Characters.Nanami.Abilities["2"],
+		game:GetService("ReplicatedStorage").Characters.Nanami.Ultimates["2"],
+		game:GetService("ReplicatedStorage").Characters.Nanami.Abilities["1"],
+		game:GetService("ReplicatedStorage").Characters.Nanami.Ultimates["1"],
+		game:GetService("ReplicatedStorage").Characters.Mob.Abilities["3"],
+		game:GetService("ReplicatedStorage").Characters.Mob.Ultimates["3"],
+		game:GetService("ReplicatedStorage").Characters.Mob.Abilities["2"],
+		game:GetService("ReplicatedStorage").Characters.Mob.Ultimates["2"],
+		game:GetService("ReplicatedStorage").Characters.Mob.Abilities["1"],
+		game:GetService("ReplicatedStorage").Characters.Mob.Ultimates["1"],
+		game:GetService("ReplicatedStorage").Characters.Sukuna.Ultimates["3"],
+		game:GetService("ReplicatedStorage").Characters.Sukuna.Abilities["3"],
+		game:GetService("ReplicatedStorage").Characters.Sukuna.Ultimates["2"],
+		game:GetService("ReplicatedStorage").Characters.Sukuna.Abilities["2"],
+		game:GetService("ReplicatedStorage").Characters.Sukuna.Ultimates["1"],
+		game:GetService("ReplicatedStorage").Characters.Sukuna.Abilities["1"])
+end
+
+local function stopAntiServerLaggerEX()
+	restoreInstances3()
+end
+local function autoantiserverlaggercheckEX()
+	local character = game:GetService("Players").LocalPlayer.Data.Character.Value
+	if character == "Gon" then
+		startGonAntiServerLaggerEX()
+	elseif	character == "Nanami" then
+		startNanamiAntiServerLaggerEX()
+	elseif	character == "Mob" then
+		startMobAntiServerLaggerEX()
+	elseif	character == "Sukuna" then
+		startSukunaAntiServerLaggerEX()
+	elseif	character == "Stark" then
+		startStarkAntiServerLaggerEX()
+	end
+end
+local mt = getrawmetatable(game)
+local old = mt.__namecall
+
+local switchcharacter = game:GetService("ReplicatedStorage")
+    :WaitForChild("Remotes")
+    :WaitForChild("Character")
+    :WaitForChild("ChangeCharacter")
+
+setreadonly(mt, false)
+mt.__namecall = newcclosure(function(self, ...)
+    local method = getnamecallmethod()
+
+    if self == switchcharacter and method == "FireServer" then
+		if Cfg.AutoAntiServerLagger then
+			stopAntiServerLagger()
+		end
+			
+		task.wait(0.5)
+		local result = old(self, ...)
+		
+		if Cfg.AutoAntiServerLagger then
+			autoantiserverlaggercheck()
+		end
+		return result
+    end
+
+    return old(self, ...)
+end)
+setreadonly(mt, true)
+		ServerLaggerSection:AddToggle({
+			Name = "AutoAntiServerLaggerEX(ability1-3 and ult1-3\n for everyone but the character you are using)",
+			Flag = "AutoAntiServerLaggerEX",
+			Default = Cfg.AutoAntiServerLaggerEX or false,
+			Callback = function(v)
+				Cfg.AutoAntiServerLaggerEX = v
+				if v then
+					autoantiserverlaggercheckEX()
+				else
+					stopAntiServerLaggerEX()
+				end
+			end
+		})
+		ServerLaggerSection:AddParagraph({
+			Title = "bug",
+			Content = "AutoantiserverlaggerEX doesnt allow you to switch\n unless you disable it"
 		})
 end
 		--[[local savedMobCounter = nil
@@ -15240,8 +15330,8 @@ mt.__namecall = newcclosure(function(self, ...)
         if hasAbility and hasBestHitCharacter then
             if part == 1 then
                 v = true
-            elseif part == 2 then
-                v = false
+			else
+				v = false
             end
         end
     end
