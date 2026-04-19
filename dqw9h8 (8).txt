@@ -9943,11 +9943,16 @@ local ConfigManager = Compkiller:ConfigManager({
 
 -- Loading UI with custom icon and duration
 Compkiller:Loader("rbxassetid://138259269816887", 2.5).yield()
-
+if Compkiller:_IsMobile() then
+	windowscale = Compkiller.Scale.Mobile
+else
+	windowscale = Compkiller.Scale.Window
+end
 local Window = Compkiller.new({
 	Name = "Tea Hub",
 	Keybind = "LeftAlt",
 	Logo = "rbxassetid://138259269816887",
+	Scale = windowscale,
 	TextSize = 15,
 	Theme = {
 		Main = Color3.fromRGB(40, 40, 40),
@@ -9957,6 +9962,7 @@ local Window = Compkiller.new({
 		Text = Color3.fromRGB(255, 255, 255)
 	}
 })
+print(Compkiller.Scale.Window)
 
 -- Welcome Notification
 Notifier.new({
