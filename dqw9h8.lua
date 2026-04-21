@@ -11591,8 +11591,8 @@ end
 
 			-- Find The Ultimate Bum
 			local ultimateBum = findUltimateBum()
-			if not ultimateBum then 
-				return false 
+			if ultimateBum == nil then 
+				return false
 			end
 
 			-- Generate unique values
@@ -11682,8 +11682,8 @@ end
 
 			-- Find The Ultimate Bum
 			local ultimateBum1 = findUltimateBum()
-			if not ultimateBum1 then 
-				return false 
+			if ultimateBum1 == nil then 
+				return false
 			end
 
 			-- Generate unique values
@@ -11773,8 +11773,8 @@ end
 
 			-- Find The Ultimate Bum
 			local ultimateBum2 = findUltimateBum()
-			if not ultimateBum2 then 
-				return false 
+			if ultimateBum2 == nil then 
+				return false
 			end
 
 			-- Generate unique values
@@ -11782,48 +11782,45 @@ end
 			local serverTime = getServerTime()
 			local randomId = math.random(100000, 999999)
 
-			for i=1,4 do
-				local remoteArgs = {
-					wallComboAbility,
-					"Characters:" .. charValue .. ":WallCombo",
-					i,
-					randomId,
-					{
-						HitboxCFrames = {nil},
-						BestHitCharacter = ultimateBum2,
-						HitCharacters = {ultimateBum2},
-						Ignore = {},
-						DeathInfo = {},
-						Actions = {[actionNumber] = {}},
-						HitInfo = {
-							Blocked = false,
-							IsFacing = true,
-							IsInFront = true
-						},
-						BlockedCharacters = {},
-						ServerTime = serverTime,
-						FromCFrame = nil
+			-- Prepare the full remote arguments
+			local remoteArgs = {
+				wallComboAbility,
+				"Characters:" .. charValue .. ":WallCombo",
+				1,
+				randomId,
+				{
+					HitboxCFrames = {nil},
+					BestHitCharacter = ultimateBum2,
+					HitCharacters = {ultimateBum2},
+					Ignore = {[actionNumber] = {ultimateBum2}},
+					DeathInfo = {},
+					Actions = {[actionNumber] = {}},
+					HitInfo = {
+						Blocked = false,
+						IsFacing = true,
+						IsInFront = true
 					},
-					actionNumber
-				}
+					BlockedCharacters = {},
+					ServerTime = serverTime,
+					FromCFrame = nil
+				},
+				actionNumber
+			}
 
-				-- Fire remotes for full damage
-				local remote1Success = pcall(function()
-					ReplicatedStorage.Remotes.Abilities.Ability:FireServer(wallComboAbility, randomId)
-				end)
+			-- Fire remotes for full damage
+			local remote1Success = pcall(function()
+				ReplicatedStorage.Remotes.Abilities.Ability:FireServer(wallComboAbility, randomId)
+			end)
 
-				local remote2Success = pcall(function()
-					ReplicatedStorage.Remotes.Combat.Action:FireServer(unpack(remoteArgs))
-				end)
-			
-				return true
-			end
+			local remote2Success = pcall(function()
+				ReplicatedStorage.Remotes.Combat.Action:FireServer(unpack(remoteArgs))
+			end)
+		
+			return true
 		end
 
-		local targetIndex = 1
-
-		local function wallcomboveryez3()
-			local function GetClosestPlayer()
+		local function wallcomboveryez3(godmodetarget)
+			local function GetClosestPlayer(godmodetarget)
 				local lpChar = LocalPlayer.Character
 				local lpHRP = lpChar and lpChar:FindFirstChild("HumanoidRootPart")
 				if not lpHRP then return nil end
@@ -11835,6 +11832,9 @@ end
 						local char = plr.Character
 						local hum = char and char:FindFirstChildOfClass("Humanoid")
 						local hrp = char and char:FindFirstChild("HumanoidRootPart")
+						if LocalPlayer:IsFriendsWith(plr.UserId) then
+							continue
+						end
 						if hum and hrp then
 							local dist = (hrp.Position - lpHRP.Position).Magnitude
 							table.insert(playerDistances, {player = plr, dist = dist})
@@ -11847,15 +11847,7 @@ end
 				end)
 
 				-- get current index target
-				local target = playerDistances[targetIndex] and playerDistances[targetIndex].player or nil
-
-				-- cycle to next index for next call
-				if targetIndex >= math.min(3, #playerDistances) then
-					targetIndex = 1
-				else
-					targetIndex = targetIndex + 1
-				end
-
+				local target = playerDistances[godmodetarget] and playerDistances[godmodetarget].player or nil
 				return target
 			end
 			local playerChar = LocalPlayer.Character
@@ -11887,9 +11879,9 @@ end
 			end
 
 			-- Find The Ultimate Bum
-			local ultimateBum3 = GetClosestPlayer()
-			if not ultimateBum3 then 
-				return false 
+			local ultimateBum3 = GetClosestPlayer(godmodetarget)
+			if ultimateBum3 == nil then 
+				return false
 			end
 
 			-- Generate unique values
@@ -11940,17 +11932,13 @@ end
 			
 			task.spawn(function()
 				while godModesActive do
-					pcall(wallcomboveryez)
-					task.wait(0.04)
-					pcall(wallcomboveryez1)
-					task.wait(0.04)
-					pcall(wallcomboveryez2)
-					task.wait(0.04)
-					pcall(wallcomboveryez3)
-					task.wait(0.04)
-					pcall(wallcomboveryez3)
-					task.wait(0.04)
-					pcall(wallcomboveryez3)
+					pcall(wallcomboveryez())
+					pcall(wallcomboveryez1())
+					pcall(wallcomboveryez2())
+					pcall(wallcomboveryez3(1))
+					pcall(wallcomboveryez3(2))
+					pcall(wallcomboveryez3(3))
+					task.wait(1)
 				end
 			end)
 			
