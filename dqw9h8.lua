@@ -11935,9 +11935,6 @@ end
 					pcall(wallcomboveryez())
 					pcall(wallcomboveryez1())
 					pcall(wallcomboveryez2())
-					pcall(wallcomboveryez3(1))
-					pcall(wallcomboveryez3(2))
-					pcall(wallcomboveryez3(3))
 					task.wait(1)
 				end
 			end)
