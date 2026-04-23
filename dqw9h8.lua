@@ -11935,7 +11935,7 @@ end
 					pcall(wallcomboveryez())
 					pcall(wallcomboveryez1())
 					pcall(wallcomboveryez2())
-					task.wait(1)
+					task.wait(0.5)
 				end
 			end)
 			
@@ -12066,7 +12066,7 @@ end
 			task.spawn(function()
 				while godModeActive do
 					pcall(wallcomboveryud)
-					task.wait(0.1)
+					task.wait()
 				end
 			end)
 			
@@ -12255,7 +12255,7 @@ function AbilitySpam5:WallCombo(number3)
 				local abilityRemote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Abilities"):WaitForChild("Ability")
 				local head = targetChar:FindFirstChild("Head")
 				local servertime = workspace:GetServerTimeNow()
-				for i=1,200 do
+				for i=1,20 do
 					local abilityArgs = {
 					ability,
 					9000000,
@@ -12620,17 +12620,15 @@ function AbilitySpam5:NoSpawnStart()
 	self.enabled = true
 		task.spawn(function()
 			pcall(function() self:setGravity(false)  end)
-			task.wait(0.1)
+			task.wait(0.2)
 			pcall(function() self:teleportupwards()  end)
 			while self.enabled do
 			pcall(function() self:GetPlayerCFrame()  end)
 				for i=1,14 do
-					task.wait()
 					pcall(function() self:NoSpawn(i)  end)
-					task.wait()
 					pcall(function() self:GetPlayerCFrame()  end)
 				end
-				task.wait(0.4)
+				task.wait(1)
 			end
 		end)
 end
