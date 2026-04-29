@@ -11003,7 +11003,7 @@ do
 		ExploitSection:AddToggle({ Name = "Fast Hits", Flag = "FastHits", Default = Cfg.FastHits, Callback = function(v) Cfg.FastHits = v; multipliers.MeleeSpeed.Value = v and 300 or 100 end})
 		ExploitSection:AddToggle({ Name = "Auto Ragdoll", Flag = "AutoRagdoll", Default = Cfg.AutoRagdoll, Callback = function(v) Cfg.AutoRagdoll = v; multipliers.MeleeDamage.Value = v and 10000000 or 100 end})
 		ExploitSection:AddToggle({ Name = "Instant Respawn", Flag = "InstantRespawn", Default = Cfg.InstantRespawn, Callback = function(v) Cfg.InstantRespawn = v; if v then start999Lives() else stop999Lives() end end})
-		ExploitSection:AddToggle({ Name = "Void Kill", Flag = "VoidKill", Default = Cfg.VoidKill, Callback = function(v) Cfg.VoidKill = v; multipliers.RagdollPower.Value = v and 1e14 or 100 end})
+		ExploitSection:AddToggle({ Name = "Super Ragdoll", Flag = "VoidKill", Default = Cfg.VoidKill, Callback = function(v) Cfg.VoidKill = v; multipliers.RagdollPower.Value = v and 1000 or 100 end})
 		ExploitSection:AddToggle({ Name = "Super Knockback", Flag = "SuperKnockback", Default = Cfg.SuperKnockback, Callback = function(v) Cfg.SuperKnockback = v; multipliers.KnockbackPower.Value = v and 10000 or 100 end})
 		ExploitSection:AddToggle({ Name = "Longer Ultimate", Flag = "LongerUlt", Default = Cfg.LongerUlt, Callback = function(v) Cfg.LongerUlt = v; ReplicatedStorage.Settings.Toggles.Endless.Value = v end})
 		ExploitSection:AddToggle({ Name = "No Stun", Flag = "NoStunExploit", Default = Cfg.NoStunExploit, Callback = function(v) Cfg.NoStunExploit = v; ReplicatedStorage.Settings.Toggles.DisableHitStun.Value = v end})
