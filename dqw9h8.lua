@@ -11611,7 +11611,7 @@ end
 					BestHitCharacter = ultimateBum,
 					HitCharacters = {ultimateBum},
 					Ignore = {[actionNumber] = {ultimateBum}},
-					DeathInfo = {},
+					DeathInfo = {ultimateBum, },
 					Actions = {[actionNumber] = {}},
 					HitInfo = {
 						Blocked = false,
@@ -12184,6 +12184,28 @@ function AbilitySpam5:FindNearestPlayer(targetnumber)
 	local target10 = playersName[targetnumber] or nil
 	return target10
 end
+function AbilitySpam5:NumberOfPlayers()
+    local char = LocalPlayer.Character
+    local hrp = char and char:FindFirstChild("HumanoidRootPart")
+    if not hrp then return nil end
+
+    local playersName2 = {}
+
+    for _, p in pairs(Players:GetPlayers()) do
+        if p ~= LocalPlayer and p.Character then
+            local th = p.Character:FindFirstChild("Humanoid")
+			if LocalPlayer:IsFriendsWith(p.UserId) and Cfg.KillAuraV3IgnoreFriends then
+            	continue
+            end
+            if th then
+				table.insert(playersName2, p)
+			end
+		end
+    end
+
+	local target10 = #playersName2
+	return target10
+end
 
 function AbilitySpam5:GetNearestPlayerCFrame(number2)
     local p = self:FindNearestPlayer(number2)
@@ -12353,6 +12375,8 @@ function AbilitySpam5:NoSpawn(number10)
     if not target then return end
 
     local targetChar = target.Character
+	local hp = targetChar:GetAttribute("Health")
+	if hp > 0 then
 		pcall(function() self:fullcustomGODMODEALL(number10)  end)
 			task.wait()
 			pcall(function()
@@ -12466,6 +12490,121 @@ function AbilitySpam5:NoSpawn(number10)
 					ReplicatedStorage.Remotes.Replication.FullCustomReplicationUnreliable:FireServer(unpack(args2, 1, 5))
 				end
 			end)
+		else
+			pcall(function() self:fullcustomGODMODEALL(number10)  end)
+			task.wait()
+			pcall(function()
+				local targetCF = self:GetNearestPlayerCFrame(number10)
+				local servertime = workspace:GetServerTimeNow()
+				local ability = ReplicatedStorage.Characters[charName].WallCombo
+				local abilityRemote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Abilities"):WaitForChild("Ability")
+				local head = targetChar:FindFirstChild("Head")
+				local remoteArgs = {
+				ability,
+				"Characters:" .. charName .. ":WallCombo",
+				1,
+				900000,
+				{
+					HitboxCFrames = {nil},
+					BestHitCharacter = targetChar,
+					HitCharacters = {targetChar},
+					Ignore = {ActionNumber1={targetChar}},
+					DeathInfo = {},
+					Actions = {ActionNumber1 = {}},
+					HitInfo = {
+						Blocked = false,
+						IsFacing = true,
+						IsInFront = true
+					},
+					BlockedCharacters = {},
+					ServerTime = servertime,
+					FromCFrame = nil
+				},
+				"Action".. math.random(1000, 9999)
+			}
+
+			-- Fire remotes for full damage
+			local remote1Success = pcall(function()
+				ReplicatedStorage.Remotes.Abilities.Ability:FireServer(ability, 900000)
+			end)
+
+			local remote2Success = pcall(function()
+				ReplicatedStorage.Remotes.Combat.Action:FireServer(unpack(remoteArgs))
+			end)
+		
+			return true
+			end)
+		pcall(function()
+				local targetCF = self:GetNearestPlayerCFrame(number10)
+				local ability = ReplicatedStorage.Characters[charName].WallCombo
+				local abilityRemote = ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("Abilities"):WaitForChild("Ability")
+				local head = targetChar:FindFirstChild("Head")
+				local servertime = workspace:GetServerTimeNow()
+				for i=1,1 do
+					local abilityArgs = {
+					ability,
+					9000000,
+					[4] = targetChar,
+					[5] = head.Position + Vector3.new(0,0,2.5)
+					}
+					abilityRemote:FireServer(unpack(abilityArgs, 1, 5))
+					local args = {
+						ability,
+						"Characters:"..charName..":WallCombo",
+						4,
+						9000000,
+						{
+							HitboxCFrames = i>1 and {targetCF,targetCF} or {},
+							BestHitCharacter = nil,
+							HitCharacters = {targetChar},
+							Ignore = {},
+							DeathInfo = {},
+							BlockedCharacters = {},
+							HitInfo = {
+								IsFacing = true,
+								IsInFront = true,
+								Blocked = false
+							},
+							ServerTime = servertime,
+							Actions = i>1 and {ActionNumber1={}} or {},
+							FromCFrame = targetCF
+						},
+						"Action".. math.random(1000, 9999),
+						i==2 and 0.1 or nil
+					}
+
+					if 4==4 then
+						args[5].RockCFrame = targetCF
+						args[5].Actions = {
+							ActionNumber1 = {
+								[target.Name] = {
+									StartCFrameStr = tostring(targetCF.X)..","..tostring(targetCF.Y)..","..tostring(targetCF.Z)..",0,0,0,0,0,0,0,0,0",
+									ImpulseVelocity = Vector3.new(1901,-25000,291),
+									AbilityName = "WallCombo",
+									RotVelocityStr = "0,0,0",
+									VelocityStr = "1.900635,0.010867,0.291061",
+									Duration = 2,
+									RotImpulseVelocity = Vector3.new(5868,-6649,-7414),
+									Seed = math.random(1,1e6),
+									LookVectorStr = "0.988493,0,0.151268"
+								}
+							}
+						}
+					end
+
+					ReplicatedStorage.Remotes.Combat.Action:FireServer(unpack(args))
+					local targetCF2 = playercframe2
+					local args2 = {
+					servertime,
+					targetCF2,
+					false,
+					nil,
+					[5] = game:GetService("Players").LocalPlayer.Character
+					}
+					ReplicatedStorage.Remotes.Replication.FullCustomReplicationUnreliable:FireServer(unpack(args2, 1, 5))
+				end
+			end)
+		end
 end
 function AbilitySpam5:UseAbility4(number8)
 		local charName = self:GetCurrentCharacter()
@@ -12480,7 +12619,7 @@ function AbilitySpam5:UseAbility4(number8)
 		if th then
 		local hp = th:GetAttribute("Health")
 			if hp > 0 then
-				for j=1,12 do
+				for j=1,1 do
 					pcall(function() self:fullcustom(number8) end)
 					task.wait()
 					pcall(function()
