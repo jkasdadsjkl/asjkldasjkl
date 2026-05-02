@@ -11935,7 +11935,7 @@ end
 					pcall(wallcomboveryez())
 					pcall(wallcomboveryez1())
 					pcall(wallcomboveryez2())
-					task.wait(0.5)
+					task.wait(1)
 				end
 			end)
 			
@@ -12375,7 +12375,8 @@ function AbilitySpam5:NoSpawn(number10)
     if not target then return end
 
     local targetChar = target.Character
-	local hp = targetChar:GetAttribute("Health")
+	local th = target.Character:FindFirstChild("Humanoid")
+	local hp = th:GetAttribute("Health")
 	if hp > 0 then
 		pcall(function() self:fullcustomGODMODEALL(number10)  end)
 			task.wait()
@@ -12490,7 +12491,7 @@ function AbilitySpam5:NoSpawn(number10)
 					ReplicatedStorage.Remotes.Replication.FullCustomReplicationUnreliable:FireServer(unpack(args2, 1, 5))
 				end
 			end)
-		else
+		elseif hp == 0 then
 			pcall(function() self:fullcustomGODMODEALL(number10)  end)
 			task.wait()
 			pcall(function()
@@ -13252,7 +13253,7 @@ function AbilitySpam4:FindNearestPlayer()
             local th = p.Character:FindFirstChild("Humanoid")
             if tr and th then
                 local hp = th:GetAttribute("Health")
-                if hp and hp > 0 then
+                if hp then
                     local d = (hrp.Position - tr.Position).Magnitude
                     if d < dist then
                         dist = d
