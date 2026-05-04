@@ -13089,7 +13089,7 @@ function AbilitySpam2:FindNearestPlayer()
             local th = p.Character:FindFirstChild("Humanoid")
             if tr and th then
                 local hp = th:GetAttribute("Health")
-                if hp and hp > 0 then
+                if hp then
                     local d = (hrp.Position - tr.Position).Magnitude
                     if d < dist then
                         dist = d
@@ -13179,16 +13179,13 @@ function AbilitySpam2:Start()
     self.connection = RunService.Heartbeat:Connect(function()
         if not self.enabled then return end
         self:UseAbility4()
-        task.wait(1)
-        if self.enabled then
-            pcall(function()
-                local c = self:GetCurrentCharacter()
-                ReplicatedStorage.Remotes.Abilities.AbilityCanceled:FireServer(
-                    ReplicatedStorage.Characters[c].Abilities["4"]
-                )
-            end)
-        end
-        task.wait(0.001)
+        task.wait()
+		pcall(function()
+			local c = self:GetCurrentCharacter()
+			ReplicatedStorage.Remotes.Abilities.AbilityCanceled:FireServer(
+				ReplicatedStorage.Characters[c].Abilities["4"]
+			)
+		end)
     end)
 end
 
